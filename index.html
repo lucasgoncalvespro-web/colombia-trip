@@ -1,0 +1,1452 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Colombie — Itinéraire 15 août → 5 sept.</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" crossorigin="anonymous"/>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Instrument+Sans:wght@400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js" crossorigin="anonymous"></script>
+<style>
+  :root{
+    --sea:#0E9AA7; --paisa:#4C9F70; --coffee:#C98A2E; --andes:#7C6CE0;
+    --iles:#1FA2D6; --amazon:#2F8F4E; --darien:#0F766E;
+    --coral:#E0673B; --saffron:#E9A13B; --sky:#3E7CB1;
+    --paper:#F4F1E9; --paper-2:#EDE8DC; --ink:#15302C; --ink-soft:#4A5F5A;
+    --line:rgba(21,48,44,.14);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{background:var(--paper);color:var(--ink);font-family:"Instrument Sans",system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+  body{display:grid;grid-template-columns:minmax(0,1fr) 490px;height:100vh;overflow:hidden}
+  @media (max-width:900px){ body{grid-template-columns:1fr;height:auto;overflow:auto} }
+
+  #map{width:100%;height:100vh;background:#A9D6E5;position:sticky;top:0}
+  @media (max-width:900px){ #map{height:50vh;position:sticky;top:0;z-index:5} }
+  .leaflet-container{font-family:"Instrument Sans",sans-serif}
+  /* relief basemap = CARTO Voyager multiplied over an Esri hillshade.
+     The hillshade is pushed in contrast so the cordilleras read at zoom 5,
+     while flat ground stays near-white and the paper palette survives. */
+  .tl-shade{mix-blend-mode:multiply}
+  .tl-relief{filter:contrast(1.45) brightness(1.03)}
+  body[data-base="relief"] .leaflet-basemap-pane{filter:saturate(1.35) contrast(1.03)}
+  .map-tools{position:absolute;left:16px;top:16px;z-index:600;display:flex;flex-direction:column;gap:8px}
+  .map-credit{position:absolute;left:16px;bottom:10px;z-index:600;font-family:"Space Mono",monospace;font-size:9px;
+    letter-spacing:.02em;color:var(--ink-soft);background:rgba(255,255,255,.72);backdrop-filter:blur(4px);
+    padding:3px 8px;border-radius:20px;pointer-events:none;opacity:.85}
+  .chip-row{display:flex;flex-wrap:wrap;gap:6px;max-width:min(72vw,580px)}
+  .chip{border:none;cursor:pointer;font-family:"Space Mono",monospace;font-size:11px;letter-spacing:.03em;
+    padding:6px 11px;border-radius:100px;background:rgba(255,255,255,.92);color:var(--ink);
+    box-shadow:0 2px 10px rgba(8,61,59,.14);backdrop-filter:blur(6px);transition:.18s;text-transform:uppercase}
+  .chip:hover{transform:translateY(-1px)}
+  .chip[data-active="true"]{background:var(--ink);color:#fff}
+  .chip .dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px;vertical-align:middle}
+
+  .pin{border-radius:50%;border:2.5px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,.35);transition:transform .18s;display:grid;place-items:center;width:25px;height:25px}
+  .pin b{font-family:"Space Mono",monospace;font-size:11px;color:#fff;line-height:1;font-weight:700}
+  .pin.sub{width:14px;height:14px;border-width:2px}
+  .pin.later{width:16px;height:16px;border-style:dashed;background:transparent!important;border-color:#8FA09A;opacity:.9}
+  .pin.pulse{transform:scale(1.45)}
+
+  .leaflet-popup-content-wrapper{border-radius:14px;box-shadow:0 12px 40px rgba(8,61,59,.28);padding:0;overflow:hidden;border:none}
+  .leaflet-popup-content{margin:0;width:236px!important}
+  .leaflet-popup-tip{background:#fff}
+  .pp-img{height:124px;position:relative;display:grid;place-items:center;overflow:hidden}
+  .pp-img .ph-art svg{width:58%;height:58%}
+
+  /* Photos sit on top of the gradient+SVG fallback; if a file is missing the
+     <img> removes itself (global capture-phase error handler) and the
+     illustration underneath shows through.
+     The art is wrapped so it owns its own stacking context: inside a Leaflet
+     popup, `.leaflet-map-pane svg` forces z-index:200 on a bare <svg>, and a
+     grid item honours z-index even when static — which would paint the
+     fallback art on top of the photo. */
+  .ph-art{position:relative;z-index:0;width:100%;height:100%;display:grid;place-items:center}
+  .ph{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:1;display:block}
+  .ph-scrim{position:absolute;inset:0;z-index:1;pointer-events:none;
+    background:linear-gradient(180deg,rgba(8,30,28,.34) 0%,rgba(8,30,28,0) 42%)}
+  .pp-body{padding:11px 13px 13px}
+  .pp-eyebrow{font-family:"Space Mono",monospace;font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;opacity:.7;margin-bottom:3px}
+  .pp-title{font-family:"Bricolage Grotesque",sans-serif;font-weight:700;font-size:16px;line-height:1.05;margin-bottom:5px}
+  .pp-note{font-size:12px;line-height:1.4;color:var(--ink-soft)}
+
+  #panel{height:100vh;overflow-y:auto;background:linear-gradient(180deg,var(--paper),var(--paper-2));border-left:1px solid var(--line);scroll-behavior:smooth}
+  @media (max-width:900px){ #panel{height:auto;overflow:visible;border-left:none;border-top:1px solid var(--line)} }
+  #panel::-webkit-scrollbar{width:9px}
+  #panel::-webkit-scrollbar-thumb{background:var(--line);border-radius:20px}
+
+  .hero{padding:30px 30px 16px;position:relative;overflow:hidden}
+  .hero::after{content:"";position:absolute;right:-40px;top:-30px;width:180px;height:180px;border-radius:50%;
+    background:radial-gradient(circle at 30% 30%,var(--saffron),transparent 70%);opacity:.5}
+  .kicker{font-family:"Space Mono",monospace;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--sea);display:flex;align-items:center;gap:8px}
+  .kicker::before{content:"";width:26px;height:1.5px;background:var(--sea)}
+  .hero h1{font-family:"Bricolage Grotesque",sans-serif;font-weight:800;font-size:38px;line-height:.95;letter-spacing:-.02em;margin:13px 0 8px}
+  .hero h1 em{font-style:normal;color:var(--coral)}
+  .hero p{max-width:380px;color:var(--ink-soft);font-size:13.5px;line-height:1.5}
+  .stats{display:flex;gap:18px;margin-top:16px;flex-wrap:wrap}
+  .stat b{display:block;font-family:"Bricolage Grotesque",sans-serif;font-weight:700;font-size:23px;line-height:1}
+  .stat span{font-family:"Space Mono",monospace;font-size:9.5px;letter-spacing:.05em;text-transform:uppercase;color:var(--ink-soft)}
+
+  .ribbon{display:flex;gap:0;overflow-x:auto;padding:14px 22px 16px;border-bottom:1px solid var(--line)}
+  .ribbon::-webkit-scrollbar{height:0}
+  .rib{flex:0 0 auto;display:flex;align-items:center}
+  .rib-stop{display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;padding:0 2px}
+  .rib-dot{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;color:#fff;
+    font-family:"Space Mono",monospace;font-size:11px;font-weight:700;box-shadow:0 2px 8px rgba(8,61,59,.2)}
+  .rib-name{font-size:10.5px;font-weight:600;white-space:nowrap;max-width:76px;overflow:hidden;text-overflow:ellipsis}
+  .rib-date{font-family:"Space Mono",monospace;font-size:9px;color:var(--ink-soft);white-space:nowrap}
+  .rib-link{width:24px;height:2px;margin:0 3px;align-self:flex-start;margin-top:12px;border-radius:2px;flex:0 0 auto}
+
+  .stops{padding:16px 22px 4px}
+  .card{position:relative;background:#fff;border:1px solid var(--line);border-radius:16px;overflow:hidden;margin:0 0 12px;cursor:pointer;transition:.18s}
+  .card:hover{transform:translateY(-2px);box-shadow:0 12px 28px rgba(8,61,59,.14);border-color:transparent}
+  .card-top{display:grid;grid-template-columns:132px 1fr;gap:0}
+  .card-img{position:relative;min-height:118px;display:grid;place-items:center;overflow:hidden}
+  .card-img .ph-art svg{width:60%;height:60%}
+  .card-num{position:absolute;top:7px;left:7px;z-index:2;font-family:"Space Mono",monospace;font-size:11px;font-weight:700;color:#fff;background:rgba(0,0,0,.42);width:22px;height:22px;border-radius:50%;display:grid;place-items:center;backdrop-filter:blur(2px)}
+  .card-body{padding:11px 14px}
+  .card-meta{display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-bottom:4px}
+  .card-date{font-family:"Space Mono",monospace;font-size:10px;letter-spacing:.03em;color:var(--ink-soft);font-weight:700}
+  .badge{font-family:"Space Mono",monospace;font-size:8.5px;letter-spacing:.02em;text-transform:uppercase;color:#fff;padding:2px 7px;border-radius:20px}
+  .card h3{font-family:"Bricolage Grotesque",sans-serif;font-weight:700;font-size:17px;line-height:1.02;margin-bottom:4px}
+  .card p{font-size:12.5px;line-height:1.42;color:var(--ink-soft)}
+  .tip{display:flex;gap:6px;margin:8px 14px 12px;font-size:11.5px;line-height:1.4;color:var(--ink-soft);
+    background:var(--paper-2);border-radius:10px;padding:8px 10px}
+  .tip b{color:var(--ink);font-weight:700}
+
+  .subrow{display:flex;flex-wrap:wrap;gap:6px;padding:2px 14px 13px}
+  .subchip{font-size:11px;display:flex;align-items:center;gap:7px;background:var(--paper-2);border:1px solid var(--line);
+    padding:3px 11px 3px 3px;border-radius:20px;cursor:pointer;transition:.15s}
+  .subchip:hover{background:#fff;transform:translateY(-1px)}
+  /* the coloured dot becomes a round photo thumbnail, same footprint */
+  .sub-stay{font-family:"Space Mono",monospace;font-size:9px;letter-spacing:.03em;color:#fff;
+    background:var(--sea);padding:1px 5px;border-radius:20px;margin-left:2px}
+  .subthumb{position:relative;width:22px;height:22px;border-radius:50%;overflow:hidden;flex:0 0 auto;display:grid;place-items:center}
+  .subthumb .ph-art svg{width:74%;height:74%;stroke-width:5}
+
+  .leg{display:flex;align-items:center;gap:9px;padding:1px 0 13px 20px;color:var(--ink-soft);font-size:11px;font-family:"Space Mono",monospace}
+  .leg .l-line{width:2px;height:26px;margin-left:9px;border-radius:2px}
+  .leg .l-line.night{background:repeating-linear-gradient(180deg,var(--ink) 0 5px,transparent 5px 11px)}
+  .leg .l-line.day{background:var(--ink);opacity:.5}
+  .leg .l-line.boat{background:repeating-linear-gradient(180deg,var(--iles) 0 2px,transparent 2px 8px)}
+  .leg .l-line.flight{background:repeating-linear-gradient(180deg,var(--coral) 0 3px,transparent 3px 7px)}
+  .leg .l-line.flightnight{height:34px;background:repeating-linear-gradient(180deg,var(--coral) 0 2px,transparent 2px 5px,var(--coral) 5px 12px,transparent 12px 15px)}
+  .leg-detail{color:var(--ink-soft);opacity:.8;font-size:10px}
+
+  .later{padding:6px 22px 8px}
+  .later-head{display:flex;align-items:baseline;gap:10px;padding:16px 0 8px}
+  .later-name{font-family:"Bricolage Grotesque",sans-serif;font-weight:700;font-size:18px}
+  .later-bar{height:3px;border-radius:3px;flex:1;background:#B9C2BC}
+  .later-sub{font-size:12.5px;color:var(--ink-soft);padding:0 0 12px;line-height:1.45}
+  .lcard{background:rgba(255,255,255,.6);border:1px dashed var(--line);border-radius:13px;padding:12px 14px;cursor:pointer;transition:.15s;margin-bottom:9px}
+  .lcard:hover{background:#fff;border-style:solid}
+  .lcard-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:5px}
+  .lcard h4{font-family:"Bricolage Grotesque",sans-serif;font-weight:700;font-size:14.5px;display:flex;align-items:center;gap:9px;min-width:0}
+  .lthumb{position:relative;width:40px;height:30px;border-radius:7px;overflow:hidden;flex:0 0 auto;display:grid;place-items:center}
+  .lthumb .ph-art svg{width:72%;height:72%;stroke-width:4}
+  .lcard-toggle{font-family:"Space Mono",monospace;font-size:9px;color:var(--ink-soft);text-transform:uppercase}
+  .lcard p{font-size:11.5px;color:var(--ink-soft);line-height:1.4;margin-bottom:6px}
+  .lcard .grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
+  .lcard .kv{font-size:11px;line-height:1.4}
+  .lcard .kv b{display:block;font-family:"Space Mono",monospace;font-size:9px;letter-spacing:.04em;text-transform:uppercase;color:var(--coral);margin-bottom:2px}
+
+  .foot{padding:20px 30px 46px;color:var(--ink-soft);font-size:12px;line-height:1.5;border-top:1px solid var(--line);margin-top:16px}
+  .credits{margin-top:12px}
+  .credits summary{font-family:"Space Mono",monospace;font-size:10px;letter-spacing:.04em;text-transform:uppercase;
+    cursor:pointer;color:var(--ink-soft);opacity:.8;list-style:none}
+  .credits summary::-webkit-details-marker{display:none}
+  .credits summary::before{content:"▸ ";display:inline-block;transition:transform .15s}
+  .credits[open] summary::before{content:"▾ "}
+  .credits summary:hover{opacity:1;color:var(--ink)}
+  #credit-list{margin-top:8px;font-size:10.5px;line-height:1.55;columns:2;column-gap:18px}
+  #credit-list a{color:var(--ink-soft);text-decoration:none;border-bottom:1px solid var(--line)}
+  #credit-list a:hover{color:var(--sea)}
+  #credit-list div{break-inside:avoid;margin-bottom:3px}
+  .legend-mode{display:flex;gap:12px;margin:8px 0 6px;flex-wrap:wrap}
+  .legend-mode span{font-family:"Space Mono",monospace;font-size:10px;display:flex;align-items:center;gap:6px}
+  .lm{width:22px;height:0;border-top:2px solid var(--ink);opacity:.6}
+  .lm.night{border-top-style:dashed;opacity:1}
+  .lm.boat{border-top-style:dotted;border-color:var(--iles);border-top-width:2.5px}
+  .lm.flight{border-top-style:dotted;border-color:var(--coral);border-top-width:2.5px}
+  .lm.flightnight{border:none;height:2.5px;width:26px;
+    background:repeating-linear-gradient(90deg,var(--coral) 0 2px,transparent 2px 5px,var(--coral) 5px 11px,transparent 11px 14px)}
+
+  /* ---- expanding detail strip under a selected stop ---- */
+  .card-detail{display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid transparent;
+    max-height:0;opacity:0;overflow:hidden;transition:max-height .34s ease,opacity .2s ease,border-color .2s}
+  .card[data-open="true"]{box-shadow:0 12px 28px rgba(8,61,59,.14);border-color:transparent}
+  .card[data-open="true"] .card-detail{max-height:180px;opacity:1;border-top-color:var(--line)}
+  .cd{padding:10px 13px;border-right:1px solid var(--line)}
+  .cd:last-child{border-right:none}
+  .cd b{display:block;font-family:"Space Mono",monospace;font-size:8.5px;letter-spacing:.07em;
+    text-transform:uppercase;color:var(--ink-soft);opacity:.75;margin-bottom:4px}
+  .cd .v{font-size:12px;font-weight:600;line-height:1.2}
+  .cd .s{font-size:10.5px;color:var(--ink-soft);line-height:1.32;margin-top:3px}
+  .bud{display:flex;gap:3px;margin-top:6px}
+  .bud i{height:3px;flex:1;border-radius:2px;background:var(--line)}
+  .bud i.on{background:var(--coffee)}
+
+  /* ---- lodging: trigger inside the expanded card ---- */
+  .lodge-bar{display:flex;gap:6px;flex-wrap:wrap;padding:9px 13px 11px;border-top:1px solid var(--line);background:var(--paper-2)}
+  .lodge-btn{font-family:"Space Mono",monospace;font-size:9.5px;letter-spacing:.04em;text-transform:uppercase;
+    border:1px solid var(--line);background:#fff;color:var(--ink);padding:5px 10px;border-radius:20px;
+    cursor:pointer;transition:.15s;display:inline-flex;align-items:center;gap:5px}
+  .lodge-btn:hover{border-color:transparent;background:var(--ink);color:#fff;transform:translateY(-1px)}
+
+  /* ---- lodging modal ---- */
+  .lodge{position:fixed;inset:0;z-index:1200;display:grid;place-items:center;padding:22px;
+    background:rgba(10,26,24,.44);backdrop-filter:blur(3px)}
+  .lodge[hidden]{display:none}
+  .lodge-box{background:var(--paper);border-radius:20px;width:min(980px,100%);max-height:88vh;overflow-y:auto;
+    position:relative;box-shadow:0 30px 80px rgba(8,61,59,.34)}
+  .lodge-x{position:absolute;top:14px;right:16px;z-index:2;border:none;background:rgba(255,255,255,.9);
+    width:30px;height:30px;border-radius:50%;cursor:pointer;font-size:14px;color:var(--ink);
+    box-shadow:0 2px 8px rgba(8,61,59,.16)}
+  .lodge-x:hover{background:var(--ink);color:#fff}
+  .lodge-head{padding:24px 28px 16px;border-bottom:1px solid var(--line)}
+  .lodge-eyebrow{font-family:"Space Mono",monospace;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--sea)}
+  .lodge-head h3{font-family:"Bricolage Grotesque",sans-serif;font-weight:800;font-size:26px;line-height:1.04;margin:8px 0 6px;letter-spacing:-.01em}
+  .lodge-meta{font-family:"Space Mono",monospace;font-size:10.5px;color:var(--ink-soft)}
+  .lodge-areas{font-size:12.5px;line-height:1.5;color:var(--ink-soft);margin-top:10px;max-width:70ch}
+  .lodge-tabs{display:flex;gap:6px;flex-wrap:wrap;padding:14px 28px 0}
+  .lodge-tab{font-family:"Space Mono",monospace;font-size:10px;letter-spacing:.03em;border:1px solid var(--line);
+    background:#fff;padding:5px 11px;border-radius:20px;cursor:pointer;transition:.15s}
+  .lodge-tab[data-on="true"]{background:var(--ink);color:#fff;border-color:transparent}
+  .lodge-cols{display:grid;grid-template-columns:repeat(3,1fr);gap:0;padding:0}
+  @media (max-width:760px){ .lodge-cols{grid-template-columns:1fr} }
+  .lcat{padding:18px 20px 22px;border-right:1px solid var(--line)}
+  .lcat:last-child{border-right:none}
+  @media (max-width:760px){ .lcat{border-right:none;border-bottom:1px solid var(--line)} }
+  .lcat-h{font-family:"Bricolage Grotesque",sans-serif;font-weight:700;font-size:14.5px;display:flex;align-items:center;gap:7px;margin-bottom:3px}
+  .lcat-dot{width:8px;height:8px;border-radius:50%;flex:0 0 auto}
+  .lcat-band{font-family:"Space Mono",monospace;font-size:9.5px;letter-spacing:.03em;color:var(--ink-soft);margin-bottom:9px}
+  .lcat-guide{font-size:11.5px;line-height:1.45;color:var(--ink-soft);margin-bottom:12px}
+  .lcat-links{display:flex;flex-direction:column;gap:6px}
+  .lcat-links a{font-family:"Space Mono",monospace;font-size:10px;letter-spacing:.03em;text-decoration:none;
+    display:flex;align-items:center;justify-content:space-between;gap:8px;
+    background:#fff;border:1px solid var(--line);border-radius:10px;padding:8px 11px;color:var(--ink);transition:.15s}
+  .lcat-links a:hover{border-color:transparent;box-shadow:0 6px 16px rgba(8,61,59,.14);transform:translateY(-1px)}
+  .lcat-links a span:last-child{opacity:.45}
+  .lcat-note{font-size:10.5px;line-height:1.45;color:var(--ink-soft);opacity:.9;margin-top:10px}
+  /* curated listings read off the live result pages */
+  .lpicks{display:flex;flex-direction:column;gap:7px;margin-bottom:11px}
+  .lpick{display:block;text-decoration:none;background:#fff;border:1px solid var(--line);border-radius:12px;
+    padding:9px 11px;transition:.15s}
+  .lpick:hover{border-color:transparent;box-shadow:0 8px 20px rgba(8,61,59,.15);transform:translateY(-1px)}
+  .lpick-top{display:flex;align-items:baseline;justify-content:space-between;gap:8px}
+  .lpick-nom{font-family:"Bricolage Grotesque",sans-serif;font-weight:700;font-size:12.5px;line-height:1.15;color:var(--ink)}
+  .lpick-eur{font-family:"Space Mono",monospace;font-size:12px;font-weight:700;color:var(--sea);white-space:nowrap}
+  .lpick-nuit{font-weight:400;font-size:9px;opacity:.7}
+  .lpick-meta{font-family:"Space Mono",monospace;font-size:9px;letter-spacing:.02em;color:var(--ink-soft);margin-top:4px}
+  .lpick-extra{font-size:10.5px;line-height:1.4;color:var(--ink-soft);margin-top:5px}
+  .lcat-links.compact a{font-size:9px;padding:6px 9px;background:transparent}
+  .lodge-foot{padding:14px 28px 22px;font-size:11px;line-height:1.5;color:var(--ink-soft);border-top:1px solid var(--line)}
+
+  /* ---- presentation mode ---- */
+  .chip.play[data-active="true"]{background:var(--coral);color:#fff}
+  .chip.delay{padding:6px 9px;min-width:44px;text-align:center}
+  .rib-stop[data-cur="true"] .rib-dot{box-shadow:0 0 0 3px rgba(224,103,59,.55),0 2px 8px rgba(8,61,59,.2)}
+  .rib-stop[data-cur="true"] .rib-name{color:var(--coral)}
+
+  .geolabel{font-family:"Space Mono",monospace;white-space:nowrap;pointer-events:none;transform:translate(-50%,-50%);line-height:1.15}
+  .geolabel.sea{color:#2E7C93;font-size:10px;letter-spacing:.24em;text-transform:uppercase;opacity:.7;text-align:center}
+  .geolabel.ctry{color:#93A399;font-size:10px;letter-spacing:.14em;text-transform:uppercase;opacity:.85}
+  .leaflet-div-icon{background:transparent;border:none}
+  .leaflet-control-zoom a{border-radius:8px!important;color:var(--ink)!important}
+  @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+
+<div id="map">
+  <div class="map-tools">
+    <div class="chip-row">
+      <button class="chip play" id="btn-tour" data-active="false"><span id="btn-tour-txt">▶ Présentation</span></button>
+      <button class="chip delay" id="btn-delay" title="Délai par étape">7 s</button>
+      <button class="chip" id="btn-route" data-active="true"><span>Itinéraire</span></button>
+      <button class="chip" id="btn-base" data-active="false"><span id="btn-base-txt">Satellite</span></button>
+    </div>
+    <div class="chip-row" id="filters"></div>
+  </div>
+  <div class="map-credit" id="map-credit"></div>
+</div>
+
+<div class="lodge" id="lodge" hidden>
+  <div class="lodge-box" role="dialog" aria-modal="true" aria-labelledby="lodge-title">
+    <button class="lodge-x" id="lodge-x" aria-label="Fermer">✕</button>
+    <div class="lodge-head">
+      <div class="lodge-eyebrow" id="lodge-eyebrow"></div>
+      <h3 id="lodge-title"></h3>
+      <div class="lodge-meta" id="lodge-meta"></div>
+      <div class="lodge-areas" id="lodge-areas"></div>
+    </div>
+    <div class="lodge-tabs" id="lodge-tabs"></div>
+    <div class="lodge-cols" id="lodge-cols"></div>
+    <div class="lodge-foot">
+      <div id="lodge-note"></div>
+      Ces boutons ouvrent une <b>recherche</b> sur Airbnb / Booking, pas une annonce précise. Sont déjà
+      réglés dans le lien&nbsp;: <b>le lieu, les dates exactes, 2 voyageurs / 1 chambre et la devise en euros</b>
+      — vérifié sur les deux sites. En revanche <b>le prix et le type de logement ne sont pas réglables par
+      URL</b> sur ces plateformes (testé, ignoré dans tous les cas), d'où l'étape manuelle indiquée sous chaque
+      catégorie. Les prix et disponibilités affichés sont donc ceux du moment où tu cliques&nbsp;: rien n'est
+      figé, et surtout rien n'est inventé ici.
+    </div>
+  </div>
+</div>
+
+<aside id="panel">
+  <div class="hero">
+    <div class="kicker">Itinéraire · à deux · 3 vols, 2 bus de nuit</div>
+    <h1>Colombie<br><em>15 août → 5 sept.</em></h1>
+    <p>Bogotá → <b>Amazonie</b> (aller-retour avion) → café → Medellín &amp; Guatapé → Caraïbes → retour Bogotá en avion. Deux longs bus de nuit portent les grandes distances terrestres ; l'avion ne sert qu'à Leticia, injoignable par la route, et au retour final depuis Santa Marta.</p>
+    <div class="stats">
+      <div class="stat"><b>21</b><span>nuits</span></div>
+      <div class="stat"><b>8</b><span>étapes</span></div>
+      <div class="stat"><b>3</b><span>vols</span></div>
+      <div class="stat"><b>2</b><span>bus de nuit</span></div>
+    </div>
+  </div>
+
+  <div class="ribbon" id="ribbon"></div>
+  <div class="stops" id="stops"></div>
+  <div class="later" id="later"></div>
+
+  <div class="foot">
+    <div class="legend-mode">
+      <span><span class="lm"></span>bus (jour)</span>
+      <span><span class="lm night"></span>bus de nuit</span>
+      <span><span class="lm boat"></span>bus + bateau</span>
+      <span><span class="lm flight"></span>vol</span>
+      <span><span class="lm flightnight"></span>vol + bus de nuit</span>
+    </div>
+    Clique une étape (carte, ruban ou fiche) pour voler jusqu'à elle et déplier son détail. Le bouton <b>Présentation</b> enchaîne les 8 étapes tout seul — le chip à côté règle le délai (4 / 7 / 10 s), <b>Échap</b> ou <b>Espace</b> arrête.<br><br>
+    Durées de trajet indicatives (trafic, saison) — à reconfirmer en réservant. Budgets&nbsp;: estimation pour une chambre double milieu de gamme, par nuit, hors repas et activités. Météo&nbsp;: moyennes saisonnières de fin août, pas une prévision.<br><br>
+    Fond de carte&nbsp;: relief Esri World Hillshade + CARTO Voyager (© OpenStreetMap contributors), vue satellite Esri World Imagery (Maxar, Earthstar Geographics).
+    <details class="credits"><summary>Crédits photo — 18 images, Wikimedia Commons</summary><div id="credit-list"></div></details>
+  </div>
+</aside>
+
+<script>
+window.COL_GEO = {"type": "FeatureCollection", "features": [{"type": "Feature", "properties": {"name": "Colombia"}, "geometry": {"type": "MultiPolygon", "coordinates": [[[[-71.319727, 11.861914], [-71.536084, 11.774072], [-71.958105, 11.666406], [-72.248486, 11.196436], [-72.446094, 11.114258], [-72.690088, 10.83584], [-72.869336, 10.49126], [-73.006543, 9.78916], [-73.366211, 9.194141], [-73.336719, 9.16792], [-73.193164, 9.194141], [-73.058398, 9.25957], [-73.009277, 9.239941], [-72.960156, 9.135156], [-72.796387, 9.108984], [-72.66543, 8.627588], [-72.416553, 8.381982], [-72.390332, 8.287061], [-72.357617, 8.087305], [-72.446045, 7.966113], [-72.471973, 7.524268], [-72.394629, 7.415088], [-72.207715, 7.370264], [-72.084277, 7.096875], [-72.006641, 7.032617], [-71.892676, 6.990332], [-71.620898, 7.03291], [-71.128613, 6.986719], [-71.013281, 6.994434], [-70.737158, 7.090039], [-70.3875, 6.972607], [-70.129199, 6.953613], [-69.427148, 6.123975], [-69.35708, 6.147998], [-69.268164, 6.099707], [-69.089941, 6.184375], [-68.937207, 6.198193], [-68.736475, 6.156787], [-68.471777, 6.156543], [-67.938867, 6.241943], [-67.85918, 6.289893], [-67.568066, 6.241797], [-67.481982, 6.180273], [-67.439355, 6.025537], [-67.473877, 5.92998], [-67.575195, 5.833105], [-67.631348, 5.709375], [-67.642285, 5.558789], [-67.694629, 5.44751], [-67.788428, 5.375488], [-67.824902, 5.270459], [-67.804199, 5.13252], [-67.855273, 4.506885], [-67.814307, 4.455078], [-67.783203, 4.198242], [-67.661621, 3.864258], [-67.602539, 3.768799], [-67.498682, 3.691113], [-67.311133, 3.415869], [-67.353613, 3.322656], [-67.834766, 2.892822], [-67.859082, 2.793604], [-67.766455, 2.833301], [-67.618701, 2.793604], [-67.568018, 2.689941], [-67.21084, 2.390137], [-67.215234, 2.275488], [-67.113818, 2.050586], [-67.131445, 1.999854], [-66.884473, 1.358252], [-66.876025, 1.223047], [-67.082275, 1.1854], [-67.090137, 1.615576], [-67.119238, 1.703613], [-67.351953, 2.08584], [-67.400439, 2.116699], [-67.556055, 2.072998], [-67.815088, 1.790088], [-67.93623, 1.748486], [-68.032861, 1.788037], [-68.130273, 1.955762], [-68.193799, 1.987012], [-68.255957, 1.845508], [-68.176562, 1.719824], [-69.319727, 1.72124], [-69.54292, 1.773242], [-69.848584, 1.70874], [-69.852148, 1.059521], [-69.311816, 1.050488], [-69.163232, 0.864062], [-69.176758, 0.712842], [-69.15332, 0.658789], [-69.283008, 0.627246], [-69.472119, 0.729932], [-69.807129, 0.607471], [-70.053906, 0.578613], [-70.070508, -0.138867], [-69.922754, -0.31748], [-69.633984, -0.509277], [-69.592041, -0.639355], [-69.611914, -0.762793], [-69.543555, -0.917188], [-69.44873, -0.99873], [-69.449121, -1.091602], [-69.400244, -1.194922], [-69.965918, -4.235938], [-70.167529, -4.050195], [-70.240283, -3.882715], [-70.339502, -3.814355], [-70.529687, -3.866406], [-70.735107, -3.781543], [-70.074023, -2.750195], [-70.064746, -2.70166], [-70.09585, -2.658203], [-70.647998, -2.405762], [-70.705371, -2.341992], [-70.968555, -2.206836], [-71.113379, -2.24541], [-71.196387, -2.313086], [-71.396973, -2.334082], [-71.559473, -2.224219], [-71.752539, -2.152734], [-71.984277, -2.326563], [-72.053809, -2.324609], [-72.218457, -2.400488], [-72.395605, -2.428906], [-72.625342, -2.35166], [-72.81123, -2.405469], [-72.941113, -2.394043], [-72.989648, -2.339746], [-73.154492, -2.278223], [-73.172656, -2.208398], [-73.126514, -2.081055], [-73.196973, -1.830273], [-73.223975, -1.787695], [-73.349512, -1.783887], [-73.496289, -1.693066], [-73.525244, -1.638867], [-73.494336, -1.536621], [-73.521387, -1.449707], [-73.664307, -1.248828], [-73.863184, -1.19668], [-74.054395, -1.028613], [-74.246387, -0.970605], [-74.334424, -0.850879], [-74.417871, -0.580664], [-74.616357, -0.37002], [-74.755371, -0.298633], [-74.801758, -0.200098], [-74.945312, -0.188184], [-75.138379, -0.050488], [-75.224609, -0.041748], [-75.284473, -0.106543], [-75.463965, -0.038428], [-75.617334, 0.062891], [-75.77666, 0.089258], [-75.879785, 0.150977], [-76.06792, 0.345557], [-76.270605, 0.439404], [-76.311035, 0.448486], [-76.388184, 0.40498], [-76.427295, 0.26123], [-76.494629, 0.235449], [-76.729004, 0.272119], [-76.767725, 0.24165], [-76.829346, 0.247754], [-77.114111, 0.355078], [-77.396338, 0.393896], [-77.467676, 0.636523], [-77.648633, 0.723633], [-77.702881, 0.837842], [-77.829541, 0.825391], [-78.312109, 1.046094], [-78.511523, 1.198828], [-78.681641, 1.283447], [-78.859668, 1.455371], [-78.888477, 1.524072], [-79.025439, 1.623682], [-78.957666, 1.752197], [-78.792969, 1.84873], [-78.576904, 1.773779], [-78.550439, 1.923633], [-78.628613, 2.05625], [-78.591699, 2.356641], [-78.534717, 2.423682], [-78.416895, 2.483496], [-78.342871, 2.460547], [-78.296143, 2.510498], [-78.12002, 2.488184], [-78.06665, 2.509131], [-77.932275, 2.629248], [-77.874512, 2.725879], [-77.813574, 2.716357], [-77.67002, 2.878857], [-77.693652, 3.039941], [-77.559131, 3.075977], [-77.417139, 3.341797], [-77.356543, 3.348584], [-77.324414, 3.474756], [-77.076807, 3.913281], [-77.166602, 3.862256], [-77.263525, 3.893213], [-77.248389, 4.040967], [-77.278027, 4.058496], [-77.358203, 3.944727], [-77.427295, 4.060449], [-77.40874, 4.247754], [-77.520703, 4.212793], [-77.515527, 4.256299], [-77.353516, 4.398291], [-77.286328, 4.721729], [-77.339453, 4.838525], [-77.373291, 5.323975], [-77.401758, 5.416162], [-77.534424, 5.537109], [-77.324609, 5.675635], [-77.249268, 5.780176], [-77.344678, 5.995361], [-77.469434, 6.176758], [-77.473047, 6.285645], [-77.398242, 6.275], [-77.368799, 6.575586], [-77.438867, 6.690332], [-77.525977, 6.693115], [-77.803711, 7.137256], [-77.901172, 7.229346], [-77.82832, 7.442822], [-77.764697, 7.483691], [-77.743896, 7.536963], [-77.761914, 7.698828], [-77.706348, 7.691211], [-77.586572, 7.543066], [-77.538281, 7.56626], [-77.350781, 7.705859], [-77.345605, 7.836523], [-77.195996, 7.972461], [-77.407275, 8.427246], [-77.478516, 8.498437], [-77.393066, 8.644678], [-77.344141, 8.636719], [-77.261572, 8.493701], [-77.130127, 8.400586], [-76.93584, 8.146826], [-76.851855, 8.090479], [-76.912207, 8.033398], [-76.924658, 7.973193], [-76.896631, 7.939453], [-76.786572, 7.931592], [-76.742334, 8.002148], [-76.77207, 8.310547], [-76.818604, 8.464697], [-76.920459, 8.57373], [-76.887988, 8.619873], [-76.689355, 8.694727], [-76.276855, 8.989111], [-76.135498, 9.265625], [-76.027246, 9.365771], [-75.905029, 9.430908], [-75.755566, 9.415625], [-75.639355, 9.450439], [-75.603613, 9.538477], [-75.680029, 9.729785], [-75.592676, 9.992725], [-75.595898, 10.12583], [-75.538574, 10.205176], [-75.558398, 10.236426], [-75.70835, 10.143408], [-75.553711, 10.327734], [-75.445996, 10.610889], [-74.84458, 11.109717], [-74.454248, 10.989062], [-74.330225, 10.99668], [-74.492285, 10.934473], [-74.51626, 10.8625], [-74.460254, 10.787061], [-74.400879, 10.765234], [-74.350195, 10.813721], [-74.219141, 11.105322], [-74.200195, 11.265723], [-74.14292, 11.32085], [-74.059131, 11.340625], [-73.676904, 11.271484], [-73.313379, 11.295752], [-72.721826, 11.712158], [-72.275, 11.889258], [-72.165234, 12.060205], [-72.135742, 12.188574], [-72.055078, 12.238428], [-71.970117, 12.238281], [-71.919141, 12.309082], [-71.714551, 12.419971], [-71.493994, 12.432275], [-71.262109, 12.335303], [-71.155029, 12.16416], [-71.137305, 12.046338], [-71.319727, 11.861914]]], [[[-78.113721, 2.541748], [-78.14082, 2.519678], [-78.19248, 2.559277], [-78.210107, 2.60918], [-78.178418, 2.646338], [-78.137646, 2.63418], [-78.113721, 2.541748]]]]}}]};
+window.NEIGH_GEO = {"type": "FeatureCollection", "features": [{"type": "Feature", "properties": {"name": "Venezuela"}, "geometry": {"type": "MultiPolygon", "coordinates": [[[[-60.821191, 9.138379], [-60.941406, 9.105566], [-60.73584, 9.20332], [-60.821191, 9.138379]]], [[[-63.849365, 11.131006], [-63.817285, 11.000342], [-63.917627, 10.887549], [-64.402344, 10.981592], [-64.213672, 11.086133], [-64.02832, 11.001855], [-63.849365, 11.131006]]], [[[-65.302344, 10.973828], [-65.266406, 10.883984], [-65.414648, 10.937891], [-65.302344, 10.973828]]], [[[-60.9979, 8.867334], [-61.069189, 8.947314], [-60.91582, 9.070312], [-60.861426, 8.949609], [-60.9979, 8.867334]]], [[[-60.017529, 8.549316], [-59.849072, 8.248682], [-60.032422, 8.053564], [-60.513623, 7.813184], [-60.718652, 7.535937], [-60.633301, 7.211084], [-60.345068, 7.15], [-60.3521, 7.002881], [-60.71792, 6.768311], [-61.145605, 6.694531], [-61.203613, 6.588379], [-61.128711, 6.214307], [-61.39082, 5.93877], [-60.671973, 5.164355], [-60.627588, 4.892529], [-61.002832, 4.535254], [-61.280078, 4.516895], [-61.554248, 4.287793], [-62.153125, 4.098389], [-62.410645, 4.156738], [-62.712109, 4.01792], [-62.7646, 3.672949], [-62.856982, 3.593457], [-62.968652, 3.593945], [-63.338672, 3.943896], [-64.021484, 3.929102], [-64.19248, 4.126855], [-64.576367, 4.139893], [-64.788672, 4.276025], [-64.668994, 4.011816], [-64.221094, 3.587402], [-64.218848, 3.204687], [-64.009033, 2.671875], [-64.046582, 2.502393], [-63.389258, 2.411914], [-63.393945, 2.22251], [-64.008496, 1.931592], [-64.205029, 1.529492], [-65.026562, 1.158447], [-65.556055, 0.687988], [-65.522998, 0.843408], [-65.644678, 0.970361], [-66.30166, 0.751953], [-66.876025, 1.223047], [-67.21084, 2.390137], [-67.618701, 2.793604], [-67.859082, 2.793604], [-67.311133, 3.415869], [-67.661621, 3.864258], [-67.855273, 4.506885], [-67.824902, 5.270459], [-67.473877, 5.92998], [-67.481982, 6.180273], [-67.85918, 6.289893], [-68.471777, 6.156543], [-69.427148, 6.123975], [-70.129199, 6.953613], [-70.737158, 7.090039], [-71.128613, 6.986719], [-72.006641, 7.032617], [-72.207715, 7.370264], [-72.471973, 7.524268], [-72.390332, 8.287061], [-72.66543, 8.627588], [-72.796387, 9.108984], [-73.058398, 9.25957], [-73.366211, 9.194141], [-73.006543, 9.78916], [-72.869336, 10.49126], [-72.690088, 10.83584], [-72.446094, 11.114258], [-72.248486, 11.196436], [-71.958105, 11.666406], [-71.319727, 11.861914], [-71.956934, 11.569922], [-71.835107, 11.190332], [-71.641602, 11.013525], [-71.730908, 10.994678], [-71.594336, 10.657373], [-72.112842, 9.815576], [-71.760742, 9.335742], [-71.686719, 9.07251], [-71.241406, 9.160449], [-71.08584, 9.348242], [-71.052686, 9.705811], [-71.494238, 10.533203], [-71.544629, 10.778711], [-71.469531, 10.96416], [-70.23252, 11.372998], [-70.097119, 11.519775], [-69.804785, 11.474219], [-69.817334, 11.67207], [-70.192578, 11.624609], [-70.286523, 11.886035], [-70.202783, 12.098389], [-70.003955, 12.177881], [-69.860107, 12.054199], [-69.631592, 11.479932], [-69.232568, 11.518457], [-68.827979, 11.431738], [-68.398633, 11.160986], [-68.27207, 10.880029], [-68.296289, 10.689355], [-68.139941, 10.492725], [-66.247217, 10.632227], [-65.851758, 10.257764], [-65.129102, 10.070068], [-64.850488, 10.098096], [-64.18833, 10.457812], [-63.731885, 10.503418], [-64.24751, 10.542578], [-64.298193, 10.635156], [-61.879492, 10.741016], [-62.37998, 10.546875], [-62.913574, 10.531494], [-62.68584, 10.289795], [-62.740576, 10.056152], [-62.550342, 10.200439], [-62.32041, 9.783057], [-62.221143, 9.882568], [-62.153369, 9.821777], [-62.155322, 9.979248], [-62.0771, 9.975049], [-61.735937, 9.631201], [-61.765918, 9.813818], [-61.588867, 9.894531], [-61.309375, 9.633057], [-61.013379, 9.556445], [-60.79248, 9.360742], [-61.023145, 9.15459], [-61.247266, 8.600342], [-61.618701, 8.597461], [-61.304004, 8.4104], [-60.800977, 8.592139], [-60.481494, 8.547266], [-60.340234, 8.62876], [-60.017529, 8.549316]]]]}}, {"type": "Feature", "properties": {"name": "Peru"}, "geometry": {"type": "Polygon", "coordinates": [[[-69.965918, -4.235938], [-70.05332, -4.333105], [-70.404639, -4.150098], [-70.799512, -4.17334], [-70.973682, -4.350488], [-71.844727, -4.504395], [-72.887061, -5.122754], [-72.979883, -5.634863], [-73.235547, -6.098438], [-73.137354, -6.46582], [-73.758105, -6.905762], [-73.804639, -7.079883], [-73.72041, -7.309277], [-73.964307, -7.378906], [-74.002051, -7.556055], [-73.72041, -7.78252], [-73.775586, -7.936426], [-73.549121, -8.345801], [-72.974023, -8.993164], [-72.970361, -9.120117], [-73.209424, -9.411426], [-72.379053, -9.510156], [-72.172852, -9.844043], [-72.181592, -10.003711], [-71.237939, -9.966016], [-70.541113, -9.4375], [-70.636914, -9.82373], [-70.642334, -11.010254], [-70.533252, -10.946875], [-70.290381, -11.064258], [-69.960352, -10.929883], [-69.578613, -10.951758], [-68.685254, -12.501953], [-68.978613, -12.880078], [-68.983447, -13.496387], [-69.074121, -13.682813], [-68.870898, -14.169727], [-69.359473, -14.795313], [-69.374707, -14.962988], [-69.172461, -15.236621], [-69.420898, -15.640625], [-69.217578, -16.149121], [-68.842773, -16.337891], [-69.03291, -16.475977], [-69.020703, -16.642188], [-69.624854, -17.200195], [-69.510937, -17.506055], [-69.8521, -17.703809], [-69.802588, -17.990234], [-69.926367, -18.206055], [-70.418262, -18.345605], [-71.336963, -17.68252], [-71.399414, -17.421973], [-71.532227, -17.294336], [-72.111279, -17.002539], [-72.467676, -16.708105], [-73.727686, -16.20166], [-75.104248, -15.411914], [-75.533643, -14.899219], [-75.933887, -14.633594], [-76.376465, -13.863086], [-76.259229, -13.802832], [-76.223633, -13.371191], [-76.832129, -12.34873], [-77.152734, -12.060352], [-77.220312, -11.663379], [-77.633203, -11.287793], [-77.736084, -10.836719], [-78.185596, -10.089063], [-78.762256, -8.616992], [-79.377246, -7.835547], [-79.617725, -7.295605], [-79.994971, -6.768945], [-81.142041, -6.056738], [-81.164307, -5.875293], [-80.930664, -5.84082], [-80.881934, -5.635059], [-81.336621, -4.669531], [-81.232031, -4.234277], [-80.798584, -3.731055], [-80.324658, -3.387891], [-80.179248, -3.877734], [-80.303271, -4.005078], [-80.490137, -4.010059], [-80.488477, -4.165527], [-80.352881, -4.208496], [-80.478564, -4.430078], [-80.383496, -4.463672], [-80.139551, -4.296094], [-79.797266, -4.476367], [-79.638525, -4.454883], [-79.330957, -4.927832], [-79.033301, -4.969141], [-78.907617, -4.714453], [-78.686035, -4.562402], [-78.679395, -4.325879], [-78.345361, -3.397363], [-78.158496, -3.465137], [-78.183301, -3.350195], [-77.860596, -2.981641], [-76.679102, -2.562598], [-76.089795, -2.133105], [-75.570557, -1.53125], [-75.408057, -0.924316], [-75.249609, -0.951855], [-75.259375, -0.590137], [-75.62627, -0.122852], [-75.340479, -0.142188], [-75.224609, -0.041748], [-74.801758, -0.200098], [-74.616357, -0.37002], [-74.246387, -0.970605], [-73.664307, -1.248828], [-73.521387, -1.449707], [-73.496289, -1.693066], [-73.196973, -1.830273], [-73.154492, -2.278223], [-72.941113, -2.394043], [-72.218457, -2.400488], [-71.752539, -2.152734], [-71.396973, -2.334082], [-70.968555, -2.206836], [-70.09585, -2.658203], [-70.074023, -2.750195], [-70.735107, -3.781543], [-70.529687, -3.866406], [-70.339502, -3.814355], [-69.965918, -4.235938]]]}}, {"type": "Feature", "properties": {"name": "Panama"}, "geometry": {"type": "MultiPolygon", "coordinates": [[[[-77.374219, 8.658301], [-77.478516, 8.498437], [-77.195996, 7.972461], [-77.538281, 7.56626], [-77.761914, 7.698828], [-77.743896, 7.536963], [-77.901172, 7.229346], [-78.170117, 7.543799], [-78.421582, 8.060986], [-78.287354, 8.091797], [-78.281201, 8.247559], [-78.141895, 8.386084], [-77.760547, 8.133252], [-78.099463, 8.496973], [-78.223047, 8.396631], [-78.399219, 8.505664], [-78.409863, 8.355322], [-78.514062, 8.628174], [-79.086377, 8.997168], [-79.50708, 8.970068], [-79.687451, 8.850977], [-79.815918, 8.639209], [-79.750439, 8.595508], [-80.458984, 8.213867], [-80.458105, 8.077051], [-80.01123, 7.500049], [-80.666699, 7.225684], [-80.901221, 7.277148], [-81.063867, 7.899756], [-81.268408, 7.625488], [-81.50415, 7.721191], [-81.727637, 8.137549], [-82.159863, 8.194824], [-82.235449, 8.311035], [-82.679541, 8.321973], [-82.866113, 8.246338], [-82.879346, 8.070654], [-83.027344, 8.337744], [-82.861621, 8.453516], [-82.917041, 8.740332], [-82.727832, 8.916064], [-82.940332, 9.060107], [-82.939844, 9.44917], [-82.801025, 9.591797], [-82.644092, 9.505859], [-82.563574, 9.57666], [-82.370801, 9.428564], [-82.339746, 9.20918], [-82.188135, 9.191748], [-82.244189, 9.031494], [-82.077881, 8.934863], [-81.780225, 8.957227], [-81.894482, 9.14043], [-81.545605, 8.827002], [-81.354785, 8.780566], [-80.838672, 8.887207], [-80.1271, 9.209912], [-79.577295, 9.597852], [-79.112256, 9.536768], [-78.082764, 9.236279], [-77.374219, 8.658301]]], [[[-78.89834, 8.274268], [-78.960596, 8.43584], [-78.883252, 8.460254], [-78.83916, 8.3479], [-78.89834, 8.274268]]], [[[-81.603271, 7.332812], [-81.852051, 7.45332], [-81.812158, 7.592383], [-81.72876, 7.621191], [-81.603271, 7.332812]]], [[[-82.259424, 9.430273], [-82.244434, 9.334082], [-82.321729, 9.418115], [-82.259424, 9.430273]]], [[[-79.06543, 8.254199], [-79.110352, 8.209814], [-79.096289, 8.29541], [-79.06543, 8.254199]]]]}}, {"type": "Feature", "properties": {"name": "Nicaragua"}, "geometry": {"type": "Polygon", "coordinates": [[[-83.15752, 14.993066], [-83.279883, 14.812793], [-83.344385, 14.9021], [-83.413721, 14.825342], [-83.299219, 14.749023], [-83.187744, 14.340088], [-83.412305, 13.996484], [-83.567334, 13.320312], [-83.510937, 12.411816], [-83.627197, 12.459326], [-83.593359, 12.713086], [-83.754248, 12.501953], [-83.65127, 12.287061], [-83.68042, 12.024316], [-83.767187, 12.059277], [-83.828906, 11.861035], [-83.70459, 11.824561], [-83.651758, 11.642041], [-83.867871, 11.300049], [-83.76792, 11.010254], [-83.641992, 10.917236], [-83.712939, 10.785889], [-84.168359, 10.780371], [-84.348291, 10.979883], [-84.701172, 11.052197], [-84.90918, 10.945312], [-85.58418, 11.189453], [-85.744336, 11.062109], [-86.468896, 11.738281], [-86.755615, 12.156641], [-87.667529, 12.903564], [-87.585059, 13.043311], [-87.389648, 12.920654], [-86.958887, 13.053711], [-86.918213, 13.223584], [-86.710693, 13.313379], [-86.733643, 13.763477], [-86.331738, 13.770068], [-86.040381, 14.050146], [-85.733936, 13.858691], [-85.179492, 14.343311], [-85.161328, 14.525146], [-84.985156, 14.752441], [-84.860449, 14.809766], [-84.453564, 14.643701], [-83.635498, 14.876416], [-83.536523, 14.977002], [-83.15752, 14.993066]]]}}, {"type": "Feature", "properties": {"name": "Ecuador"}, "geometry": {"type": "MultiPolygon", "coordinates": [[[[-75.284473, -0.106543], [-75.62627, -0.122852], [-75.259375, -0.590137], [-75.249609, -0.951855], [-75.408057, -0.924316], [-75.570557, -1.53125], [-76.089795, -2.133105], [-76.679102, -2.562598], [-77.860596, -2.981641], [-78.183301, -3.350195], [-78.158496, -3.465137], [-78.345361, -3.397363], [-78.679395, -4.325879], [-78.686035, -4.562402], [-78.907617, -4.714453], [-79.033301, -4.969141], [-79.330957, -4.927832], [-79.638525, -4.454883], [-79.797266, -4.476367], [-80.139551, -4.296094], [-80.383496, -4.463672], [-80.478564, -4.430078], [-80.352881, -4.208496], [-80.488477, -4.165527], [-80.490137, -4.010059], [-80.303271, -4.005078], [-80.179248, -3.877734], [-80.324658, -3.387891], [-79.96333, -3.157715], [-79.729883, -2.579102], [-79.842139, -2.067383], [-79.925586, -2.548535], [-80.030176, -2.556738], [-80.006641, -2.353809], [-80.284717, -2.706738], [-80.932178, -2.269141], [-80.962793, -2.189258], [-80.770361, -2.07666], [-80.760596, -1.93457], [-80.902393, -1.078906], [-80.553906, -0.847949], [-80.455469, -0.585449], [-80.282373, -0.620508], [-80.482275, -0.368262], [-80.046143, 0.155371], [-80.035937, 0.83457], [-78.899658, 1.20625], [-78.859668, 1.455371], [-78.180664, 0.968555], [-77.702881, 0.837842], [-77.467676, 0.636523], [-77.396338, 0.393896], [-76.494629, 0.235449], [-76.270605, 0.439404], [-75.77666, 0.089258], [-75.284473, -0.106543]]], [[[-80.131592, -2.973145], [-80.272949, -2.995898], [-80.223682, -2.753125], [-80.080762, -2.668848], [-79.909033, -2.725586], [-80.131592, -2.973145]]], [[[-78.909229, 1.252783], [-78.991699, 1.293213], [-78.899805, 1.359766], [-78.909229, 1.252783]]], [[[-90.334863, -0.771582], [-90.542139, -0.676465], [-90.531689, -0.581445], [-90.269385, -0.484668], [-90.192725, -0.658789], [-90.334863, -0.771582]]], [[[-89.418896, -0.911035], [-89.608594, -0.888574], [-89.287842, -0.689844], [-89.259375, -0.728418], [-89.418896, -0.911035]]], [[[-91.425977, -0.46084], [-91.610742, -0.443945], [-91.64668, -0.284473], [-91.460156, -0.255664], [-91.425977, -0.46084]]], [[[-90.37915, -1.292285], [-90.519531, -1.299121], [-90.477197, -1.220996], [-90.37915, -1.292285]]], [[[-91.361377, 0.12583], [-90.799658, -0.752051], [-90.905518, -0.940527], [-91.131055, -1.019629], [-91.419043, -0.99668], [-91.49541, -0.860938], [-91.120947, -0.559082], [-91.369189, -0.287207], [-91.428857, -0.023389], [-91.596826, 0.0021], [-91.361377, 0.12583]]], [[[-90.573926, -0.333984], [-90.809033, -0.329395], [-90.867773, -0.271387], [-90.780371, -0.160449], [-90.573926, -0.333984]]]]}}, {"type": "Feature", "properties": {"name": "Costa Rica"}, "geometry": {"type": "Polygon", "coordinates": [[[-82.563574, 9.57666], [-82.644092, 9.505859], [-82.801025, 9.591797], [-82.939844, 9.44917], [-82.940332, 9.060107], [-82.727832, 8.916064], [-82.917041, 8.740332], [-82.861621, 8.453516], [-83.027344, 8.337744], [-82.879346, 8.070654], [-83.285791, 8.664355], [-83.469727, 8.706836], [-83.291504, 8.406006], [-83.604736, 8.480322], [-83.734082, 8.614453], [-83.613721, 8.804053], [-83.736914, 9.150293], [-84.222363, 9.4625], [-84.581592, 9.568359], [-84.714941, 9.899414], [-85.025049, 10.115723], [-85.263184, 10.256641], [-85.160742, 10.017432], [-84.886426, 9.820947], [-85.114502, 9.581787], [-85.314551, 9.810937], [-85.624854, 9.902441], [-85.849658, 10.292041], [-85.667236, 10.74502], [-85.908008, 10.897559], [-85.58418, 11.189453], [-84.90918, 10.945312], [-84.701172, 11.052197], [-84.348291, 10.979883], [-84.168359, 10.780371], [-83.919287, 10.735352], [-83.712939, 10.785889], [-83.641992, 10.917236], [-83.346826, 10.315381], [-82.778418, 9.669531], [-82.563574, 9.57666]]]}}, {"type": "Feature", "properties": {"name": "Brazil"}, "geometry": {"type": "MultiPolygon", "coordinates": [[[[-66.876025, 1.223047], [-66.347119, 0.767187], [-66.060059, 0.785352], [-65.681445, 0.983447], [-65.522998, 0.843408], [-65.556055, 0.687988], [-65.473389, 0.69126], [-65.10376, 1.108105], [-64.205029, 1.529492], [-64.008496, 1.931592], [-63.43252, 2.155566], [-63.389258, 2.411914], [-64.046582, 2.502393], [-64.009033, 2.671875], [-64.218848, 3.204687], [-64.221094, 3.587402], [-64.668994, 4.011816], [-64.788672, 4.276025], [-64.576367, 4.139893], [-64.19248, 4.126855], [-64.021484, 3.929102], [-63.338672, 3.943896], [-62.968652, 3.593945], [-62.856982, 3.593457], [-62.7646, 3.672949], [-62.712109, 4.01792], [-62.410645, 4.156738], [-62.153125, 4.098389], [-61.82085, 4.197021], [-61.280078, 4.516895], [-61.002832, 4.535254], [-60.627588, 4.892529], [-60.742139, 5.202051], [-60.651367, 5.221143], [-60.142041, 5.238818], [-59.990674, 5.082861], [-60.148633, 4.533252], [-59.703271, 4.381104], [-59.738574, 4.226758], [-59.551123, 3.933545], [-59.854395, 3.5875], [-59.994336, 2.68999], [-59.889648, 2.362939], [-59.755225, 2.274121], [-59.756201, 1.900635], [-59.666602, 1.746289], [-59.231201, 1.376025], [-58.8625, 1.203613], [-58.511865, 1.284668], [-58.506055, 1.438672], [-58.340674, 1.587549], [-58.034668, 1.520264], [-57.982812, 1.648438], [-57.594434, 1.704102], [-57.366797, 1.940137], [-57.118896, 2.013965], [-56.836719, 1.88125], [-56.482812, 1.942139], [-55.96333, 1.85708], [-55.915332, 2.039551], [-56.137695, 2.259033], [-55.957471, 2.520459], [-55.730566, 2.406152], [-54.978662, 2.597656], [-54.661865, 2.327539], [-54.130078, 2.121045], [-53.767773, 2.354834], [-53.508984, 2.253125], [-53.334424, 2.339746], [-53.229785, 2.204883], [-52.964844, 2.183545], [-52.653174, 2.425732], [-52.327881, 3.181738], [-51.54707, 4.310889], [-51.461523, 4.31377], [-51.219922, 4.093604], [-50.714404, 2.134033], [-50.608691, 2.104102], [-50.458887, 1.82959], [-49.957129, 1.659863], [-49.898877, 1.162988], [-50.294434, 0.835742], [-50.755078, 0.222559], [-51.28291, -0.085205], [-51.702637, -0.762305], [-51.720605, -1.018457], [-51.921631, -1.180859], [-51.980811, -1.367969], [-52.229248, -1.3625], [-52.66416, -1.551758], [-52.19668, -1.640137], [-51.947559, -1.586719], [-50.894922, -0.937598], [-50.838184, -1.038867], [-50.917871, -1.115234], [-50.690039, -1.761719], [-50.403223, -2.015527], [-49.999219, -1.831836], [-49.719531, -1.926367], [-49.313672, -1.731738], [-49.636523, -2.656934], [-49.45752, -2.50459], [-49.211035, -1.916504], [-48.991309, -1.829785], [-48.71001, -1.487695], [-48.462939, -1.613965], [-48.349805, -1.482129], [-48.468066, -1.393848], [-48.449805, -1.145508], [-48.115088, -0.7375], [-47.557324, -0.669922], [-47.418652, -0.765918], [-47.439063, -0.647656], [-47.268604, -0.64541], [-46.81123, -0.779688], [-46.617236, -0.970605], [-46.219141, -1.03125], [-45.644775, -1.347852], [-45.458594, -1.35625], [-45.32915, -1.717285], [-45.076367, -1.466406], [-44.721143, -1.733496], [-44.778516, -1.798828], [-44.65127, -1.745801], [-44.537793, -2.052734], [-44.756348, -2.265527], [-44.662402, -2.373242], [-44.435449, -2.168066], [-44.381836, -2.365527], [-44.520117, -2.405469], [-44.589014, -2.573438], [-44.723047, -3.204785], [-44.437549, -2.944434], [-44.228613, -2.471289], [-44.105566, -2.493457], [-44.192676, -2.80957], [-43.93291, -2.583496], [-43.455127, -2.502051], [-43.380078, -2.376074], [-42.936719, -2.465039], [-42.249609, -2.791992], [-41.876172, -2.746582], [-41.479932, -2.916504], [-40.474561, -2.795605], [-39.964697, -2.861523], [-38.475781, -3.71748], [-38.048828, -4.216406], [-37.626318, -4.59209], [-37.301465, -4.713086], [-37.174658, -4.912402], [-36.590723, -5.097559], [-35.979883, -5.054395], [-35.549414, -5.129395], [-35.235449, -5.566699], [-34.805469, -7.288379], [-34.834668, -7.971484], [-34.96665, -8.407617], [-35.157764, -8.930566], [-35.59707, -9.540625], [-35.763965, -9.702539], [-35.89082, -9.687012], [-35.885449, -9.847656], [-36.39834, -10.484082], [-36.937793, -10.82041], [-37.356006, -11.403906], [-37.359229, -11.252539], [-37.688721, -12.1], [-38.239746, -12.844238], [-38.498926, -12.956641], [-38.524902, -12.762305], [-38.690967, -12.623926], [-38.851758, -12.790137], [-38.763721, -12.907227], [-39.030908, -13.365137], [-39.089355, -13.588184], [-38.988623, -13.615039], [-39.048145, -14.043945], [-39.008496, -14.101172], [-38.942334, -14.030664], [-39.05957, -14.654785], [-38.880615, -15.864258], [-39.202881, -17.178125], [-39.154004, -17.703906], [-39.650781, -18.252344], [-39.783301, -19.571777], [-40.001367, -19.741992], [-40.395947, -20.569434], [-40.789258, -20.906055], [-40.954541, -21.237891], [-41.047266, -21.505664], [-41.000293, -21.999023], [-41.705518, -22.309668], [-41.98042, -22.580664], [-41.940918, -22.788281], [-42.042383, -22.94707], [-42.958301, -22.96709], [-43.154297, -22.725195], [-43.241943, -22.795117], [-43.22417, -22.991211], [-43.898828, -23.101465], [-43.973828, -23.057324], [-43.675977, -23.009473], [-43.866162, -22.910547], [-44.637256, -23.055469], [-44.673828, -23.206641], [-44.569678, -23.274023], [-45.325391, -23.599707], [-45.464307, -23.802539], [-45.97207, -23.795508], [-46.867285, -24.236328], [-47.98916, -25.035742], [-47.90835, -25.068164], [-47.929395, -25.168262], [-48.202734, -25.416504], [-48.185937, -25.309863], [-48.40249, -25.27207], [-48.476123, -25.442969], [-48.731738, -25.36875], [-48.692187, -25.491504], [-48.401172, -25.597363], [-48.545166, -25.815918], [-48.665771, -25.844336], [-48.576318, -25.935449], [-48.619434, -26.179395], [-48.748291, -26.268652], [-48.651611, -26.406445], [-48.677734, -26.70293], [-48.55415, -27.195996], [-48.642578, -27.55791], [-48.620801, -28.075586], [-48.799658, -28.575293], [-49.271289, -28.871191], [-49.745996, -29.363184], [-50.299512, -30.425781], [-50.921387, -31.258398], [-52.039209, -32.114844], [-52.063232, -31.830371], [-51.893164, -31.867773], [-51.680664, -31.774609], [-51.272168, -31.476953], [-51.161426, -31.118848], [-50.980078, -31.094238], [-50.94082, -30.903711], [-50.689307, -30.704199], [-50.716309, -30.425977], [-50.581934, -30.438867], [-50.563525, -30.253613], [-51.024951, -30.368652], [-51.298047, -30.034863], [-51.281787, -30.244141], [-51.157275, -30.364258], [-51.283057, -30.751563], [-51.359082, -30.674512], [-51.506299, -31.104492], [-51.972461, -31.383789], [-52.193555, -31.885547], [-52.127393, -32.167773], [-52.652246, -33.137793], [-53.370605, -33.742188], [-53.531348, -33.655469], [-53.531348, -33.170898], [-53.125586, -32.736719], [-53.601709, -32.403027], [-53.761719, -32.056836], [-54.220557, -31.855176], [-54.587646, -31.485156], [-55.173535, -31.27959], [-55.603027, -30.850781], [-55.807764, -31.036719], [-56.004687, -31.079199], [-56.044824, -30.777637], [-56.832715, -30.107227], [-57.120508, -30.144434], [-57.214453, -30.283398], [-57.608887, -30.187793], [-56.938623, -29.594824], [-55.890527, -28.37002], [-55.687256, -28.381641], [-55.725488, -28.204102], [-55.101514, -27.866797], [-54.829102, -27.550586], [-54.327002, -27.423535], [-53.838184, -27.121094], [-53.717285, -26.882812], [-53.671289, -26.225098], [-53.891162, -25.668848], [-54.012305, -25.57793], [-54.615869, -25.576074], [-54.43623, -25.121289], [-54.318262, -24.128125], [-54.241797, -24.047266], [-54.625488, -23.8125], [-55.194336, -24.01748], [-55.415918, -23.951367], [-55.650732, -22.886426], [-55.617676, -22.671484], [-55.799561, -22.353906], [-56.246045, -22.264648], [-56.447803, -22.076172], [-56.633008, -22.234863], [-56.937256, -22.271289], [-57.879834, -22.135645], [-57.985693, -22.046387], [-57.830225, -20.997949], [-58.159766, -20.164648], [-57.860742, -19.97959], [-58.131494, -19.744531], [-57.716797, -19.044043], [-57.783105, -18.914258], [-57.495654, -18.214648], [-57.832471, -17.512109], [-57.990918, -17.512891], [-58.395996, -17.234277], [-58.478125, -16.700684], [-58.345605, -16.284375], [-60.175586, -16.269336], [-60.242334, -15.47959], [-60.583203, -15.09834], [-60.27334, -15.08877], [-60.506592, -13.789844], [-61.077002, -13.489746], [-61.789941, -13.525586], [-62.118018, -13.159766], [-62.765479, -12.997266], [-63.06748, -12.669141], [-63.34668, -12.680078], [-63.688574, -12.478027], [-63.938574, -12.529688], [-64.420508, -12.439746], [-64.513428, -12.250977], [-64.992529, -11.975195], [-65.090283, -11.741211], [-65.185742, -11.749512], [-65.389893, -11.246289], [-65.323779, -11.024805], [-65.447119, -10.507422], [-65.298584, -10.146777], [-65.396143, -9.712402], [-66.575342, -9.899902], [-67.416943, -10.389844], [-67.721777, -10.683105], [-68.07168, -10.703125], [-68.311133, -10.975195], [-68.622656, -11.10918], [-69.228516, -10.955664], [-69.960352, -10.929883], [-70.341992, -11.066699], [-70.533252, -10.946875], [-70.642334, -11.010254], [-70.636914, -9.82373], [-70.541113, -9.4375], [-71.237939, -9.966016], [-72.181592, -10.003711], [-72.172852, -9.844043], [-72.379053, -9.510156], [-73.209424, -9.411426], [-72.970361, -9.120117], [-72.974023, -8.993164], [-73.549121, -8.345801], [-73.775586, -7.936426], [-73.72041, -7.78252], [-74.002051, -7.556055], [-73.964307, -7.378906], [-73.72041, -7.309277], [-73.804639, -7.079883], [-73.758105, -6.905762], [-73.137354, -6.46582], [-73.235547, -6.098438], [-72.979883, -5.634863], [-72.887061, -5.122754], [-71.844727, -4.504395], [-70.973682, -4.350488], [-70.799512, -4.17334], [-70.404639, -4.150098], [-70.23916, -4.301172], [-69.972021, -4.301172], [-69.400244, -1.194922], [-69.611914, -0.762793], [-69.633984, -0.509277], [-70.070508, -0.138867], [-70.053906, 0.578613], [-69.472119, 0.729932], [-69.15332, 0.658789], [-69.163232, 0.864062], [-69.311816, 1.050488], [-69.852148, 1.059521], [-69.848584, 1.70874], [-69.54292, 1.773242], [-68.176562, 1.719824], [-68.255957, 1.845508], [-68.193799, 1.987012], [-67.93623, 1.748486], [-67.400439, 2.116699], [-67.119238, 1.703613], [-67.082275, 1.1854], [-66.876025, 1.223047]]], [[[-49.628662, -0.229199], [-49.116992, -0.163574], [-48.392676, -0.297363], [-48.570947, -0.892871], [-48.839697, -1.226562], [-48.833594, -1.390039], [-49.038477, -1.514063], [-49.172705, -1.412598], [-49.233984, -1.599512], [-49.506641, -1.511621], [-49.587891, -1.712402], [-49.805127, -1.790234], [-50.065723, -1.703809], [-50.507617, -1.787988], [-50.759766, -1.240234], [-50.729492, -1.126758], [-50.576953, -1.103125], [-50.709619, -1.077734], [-50.796094, -0.90625], [-50.645508, -0.272852], [-50.248242, -0.116406], [-49.628662, -0.229199]]], [[[-44.129297, -23.141895], [-44.320068, -23.212305], [-44.360156, -23.17207], [-44.242871, -23.074121], [-44.129297, -23.141895]]], [[[-48.584424, -26.401563], [-48.665771, -26.289648], [-48.539746, -26.170313], [-48.497607, -26.21875], [-48.584424, -26.401563]]], [[[-45.302344, -23.727539], [-45.260889, -23.941309], [-45.451416, -23.895605], [-45.302344, -23.727539]]], [[[-44.482568, -2.811914], [-44.597754, -3.037598], [-44.481445, -2.717578], [-44.482568, -2.811914]]], [[[-38.601172, -12.992578], [-38.786963, -13.055078], [-38.668115, -12.880176], [-38.601172, -12.992578]]], [[[-38.907129, -13.401074], [-38.977588, -13.523535], [-39.022168, -13.445605], [-38.907129, -13.401074]]], [[[-44.883105, -1.317871], [-44.967871, -1.39082], [-45.02085, -1.372363], [-44.978662, -1.267285], [-44.883105, -1.317871]]], [[[-50.272656, 0.231738], [-49.697266, 0.215967], [-49.91709, -0.023193], [-50.339453, 0.043359], [-50.272656, 0.231738]]], [[[-50.298975, 1.938525], [-50.456104, 1.910498], [-50.491016, 2.128613], [-50.341992, 2.141748], [-50.298975, 1.938525]]], [[[-50.652881, -0.131641], [-50.926367, -0.327344], [-51.038086, -0.225879], [-50.995068, -0.105273], [-50.842187, -0.050195], [-50.666992, -0.058008], [-50.652881, -0.131641]]], [[[-49.443896, -0.112402], [-49.708838, -0.14375], [-49.830078, -0.093896], [-49.503467, 0.083691], [-49.372314, 0.001074], [-49.443896, -0.112402]]], [[[-50.332275, 0.259033], [-50.443945, -0.007666], [-50.623926, 0.054395], [-50.372754, 0.590869], [-50.332275, 0.259033]]], [[[-50.15293, 0.393018], [-50.261328, 0.35918], [-50.281689, 0.516504], [-50.058838, 0.638037], [-50.15293, 0.393018]]], [[[-51.276318, -1.021777], [-51.938379, -1.452637], [-51.680029, -1.086133], [-51.678271, -0.855078], [-51.546045, -0.649609], [-51.254004, -0.541406], [-51.160742, -0.666699], [-51.276318, -1.021777]]], [[[-48.414893, -27.399609], [-48.55459, -27.812207], [-48.542187, -27.574805], [-48.414893, -27.399609]]]]}}]};
+</script>
+<script>
+'use strict';
+/* ---------- SAFE WRAPPER ---------- */
+function safe(fn){ return function(...args){ try{ return fn.apply(this,args); }catch(err){ console.warn('[carte] handler error, ignored:', err); } }; }
+
+/* ---------- REGIONS ---------- */
+const R = {
+  andes:{name:"Andes",color:"#7C6CE0"},
+  cafe:{name:"Café",color:"#C98A2E"},
+  antioquia:{name:"Antioquia",color:"#4C9F70"},
+  amazon:{name:"Amazonie",color:"#2F8F4E"},
+  caraibe:{name:"Caraïbe",color:"#0E9AA7"},
+  iles:{name:"Îles",color:"#1FA2D6"},
+  darien:{name:"Darién",color:"#0F766E"},
+};
+function shade(hex){const n=parseInt(hex.slice(1),16);let r=n>>16,g=(n>>8)&255,b=n&255;
+  r=Math.round(r*.6);g=Math.round(g*.6);b=Math.round(b*.6);return `#${(r<<16|g<<8|b).toString(16).padStart(6,'0')}`;}
+
+/* ---------- SVG LINE-ART (self-contained, no network) ---------- */
+const SVG_OPEN='<svg viewBox="0 0 120 90" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" opacity="0.95">';
+const ART={
+  andes:`${SVG_OPEN}<path d="M8 66 L38 26 L52 46 L70 18 L112 66 Z"/><circle cx="90" cy="24" r="7" fill="#fff" stroke="none" opacity=".85"/></svg>`,
+  cafe:`${SVG_OPEN}<path d="M10 68 Q30 50 60 68 Q90 50 110 68"/><path d="M30 68 V38 Q30 30 24 26 M30 38 Q30 30 36 26"/><path d="M60 68 V30 Q60 22 54 18 M60 30 Q60 22 66 18"/><path d="M90 68 V42 Q90 34 84 30 M90 42 Q90 34 96 30"/></svg>`,
+  antioquia:`${SVG_OPEN}<path d="M22 70 V34 M22 34 H40" /><rect x="34" y="30" width="12" height="10" rx="1.5"/><path d="M22 34 Q22 20 22 14"/><path d="M60 70 V22 M60 22 L98 22"/><rect x="74" y="18" width="10" height="9" rx="1.5"/><path d="M14 70 H108" opacity=".6"/><rect x="86" y="52" width="10" height="18" opacity=".7"/><rect x="100" y="46" width="8" height="24" opacity=".7"/></svg>`,
+  amazon:`${SVG_OPEN}<path d="M6 40 Q30 24 48 40 T90 40 T114 26"/><path d="M18 58 L38 50 L38 58 L54 50 L54 60" opacity=".85"/><path d="M70 66 Q76 54 88 56 Q84 64 70 66Z" fill="#fff" stroke="none" opacity=".8"/><path d="M30 74 Q36 62 48 64 Q44 72 30 74Z" fill="#fff" stroke="none" opacity=".6"/></svg>`,
+  colonial:`${SVG_OPEN}<path d="M10 68 V38 H20 V32 H30 V38 H40 V32 H50 V38 H60 V32 H70 V38 H80 V32 H90 V38 H100 V68 Z"/><path d="M55 32 V18 L64 22 L55 26" fill="#fff" stroke="none" opacity=".8"/><path d="M10 68 H100" /></svg>`,
+  island:`${SVG_OPEN}<path d="M30 70 Q30 44 20 30"/><path d="M20 30 Q10 26 6 34 Q16 38 20 30Z" fill="#fff" stroke="none" opacity=".7"/><path d="M20 30 Q26 20 36 22 Q30 32 20 30Z" fill="#fff" stroke="none" opacity=".85"/><path d="M20 30 Q30 24 38 30 Q30 34 20 30Z" fill="#fff" stroke="none" opacity=".6"/><path d="M14 56 Q30 46 46 56" opacity=".8"/><path d="M8 68 Q30 60 112 68" opacity=".5"/></svg>`,
+  sierra:`${SVG_OPEN}<path d="M4 58 L26 30 L40 44 L58 20 L78 44 L96 30 L116 58Z"/><path d="M4 70 Q30 60 60 70 T116 70" opacity=".6"/></svg>`,
+  lake:`${SVG_OPEN}<path d="M60 12 L40 68 H80 Z"/><ellipse cx="60" cy="74" rx="46" ry="8" opacity=".7"/><path d="M22 74 Q60 82 98 74" opacity=".4"/></svg>`,
+  city:`${SVG_OPEN}<path d="M60 10 V70 M46 26 H60 M60 26 Q78 26 78 38 Q78 46 66 46 L60 46"/><rect x="10" y="50" width="14" height="20"/><rect x="28" y="42" width="14" height="28"/><rect x="88" y="46" width="14" height="24"/><path d="M6 70 H112" opacity=".5"/></svg>`,
+};
+const artFor = key => ART[key] || ART.sierra;
+
+/* ---------- PHOTOS ----------
+   Real photos live in /images and are layered over the SVG art above, which
+   stays in place as the fallback. Credits are inlined (not fetched) so the
+   attribution survives even when the page is opened straight off disk.
+   Source for all of them: Wikimedia Commons. Mirror of images/credits.json. */
+const PHOTO_CREDITS={
+  "bogota":["Pedro Szekely","CC BY-SA 2.0","https://commons.wikimedia.org/wiki/File:La_Candelaria%2C_Bogota%2C_Colombia_(5818105341).jpg"],
+  "bogota-depart":["Felipe Restrepo Acosta","CC BY-SA 4.0","https://commons.wikimedia.org/wiki/File:2019_Bogot%C3%A1_-_Iglesia_de_Monserrate.jpg"],
+  "salento":["Bernard Gagnon","CC BY-SA 4.0","https://commons.wikimedia.org/wiki/File:Calle_5%2C_Salento_03.jpg"],
+  "cocora":["Estebanhphoto","CC BY 4.0","https://commons.wikimedia.org/wiki/File:Paisaje_Valle_del_Cocora.jpg"],
+  "medellin":["Carlos Andres Granada","CC BY-SA 4.0","https://commons.wikimedia.org/wiki/File:Medell%C3%ADn_Panor%C3%A1mica.jpg"],
+  "guatape":["Juan Gómez","CC BY 2.0","https://commons.wikimedia.org/wiki/File:Piedra_y_Embalse_del_Pe%C3%B1ol_desde_dron_05.jpg"],
+  "leticia":["Josefordonez","CC BY-SA 4.0","https://commons.wikimedia.org/wiki/File:Atardecer_en_el_R%C3%ADo_amamazonas_Leticia%2CColombia.jpg"],
+  "puerto-narino":["Gatocalvo","CC BY-SA 4.0","https://commons.wikimedia.org/wiki/File:Puerto_Nari%C3%B1o_Departamento_del_Amazonas.jpg"],
+  "cartagena":["Juanfernandovilla","CC BY-SA 4.0","https://commons.wikimedia.org/wiki/File:Calles_Coloniales_en_Cartagena.JPG"],
+  "san-bernardo":["XibalbaWikiCommons","CC BY-SA 3.0","https://commons.wikimedia.org/wiki/File:Isla_M%C3%BAcura_-_playa_-_Colombia.jpg"],
+  "islas-rosario":["Jorge Láscar","CC BY 2.0","https://commons.wikimedia.org/wiki/File:Playa_Blanca_-_Islas_del_Rosario_(4625668665).jpg"],
+  "santa-marta":["CristhianVarela","CC BY-SA 4.0","https://commons.wikimedia.org/wiki/File:Bah%C3%ADa_de_Santa_Marta.jpg"],
+  "minca":["Giancarlos1234","CC BY-SA 4.0","https://commons.wikimedia.org/wiki/File:Santa_Marta_cascadas.jpg"],
+  "tayrona":["Uhkabu","CC BY-SA 3.0","https://commons.wikimedia.org/wiki/File:El_Cabo_at_Tayrona_National_Park.JPG"],
+  "taganga":["Henrr Pomares","CC0","https://commons.wikimedia.org/wiki/File:Taganga%2C_Santa_Marta%2C_Colombia.jpg"],
+  "san-andres":["Mario Carvajal","CC BY 3.0","https://commons.wikimedia.org/wiki/File:Johny_Cay.jpg"],
+  "capurgana":["Johan Andrés Toro","CC BY-SA 4.0","https://commons.wikimedia.org/wiki/File:Bah%C3%ADa_de_Sapzurro_y_claridad_marina.jpg"],
+  "tatacoa":["SergiXCX","CC BY-SA 4.0","https://commons.wikimedia.org/wiki/File:Desierto_de_La_Tatacoa_(Tatacoa_Desert).jpg"],
+  "cano-cristales":["Ricardo Gonzalez Arango","CC BY-SA 4.0","https://commons.wikimedia.org/wiki/File:Ca%C3%B1o_cristales_(La_Macarena).jpg"],
+};
+const esc = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+/* A photo missing on disk must not leave a broken-image icon: drop the <img>
+   and let the gradient + line-art fallback underneath take over. Delegated in
+   the capture phase because Leaflet builds popup images lazily. */
+document.addEventListener('error',function(ev){
+  const t=ev.target;
+  if(t && t.tagName==='IMG' && t.classList.contains('ph')){ t.remove(); }
+},true);
+function photoHTML(slug,alt){
+  if(!slug) return '';
+  const c=PHOTO_CREDITS[slug];
+  const title=c?`${alt} — © ${c[0]} / ${c[1]} (Wikimedia Commons)`:alt;
+  /* eager, not lazy: the whole set is ~4 MB on disk, and presentation mode
+     flies through the stops faster than lazy loading would fill them in */
+  return `<img class="ph" src="images/${slug}.jpg" alt="${esc(alt)}" title="${esc(title)}" decoding="async">`;
+}
+/* gradient + line-art fallback, with the photo layered on top when present */
+function visualHTML(o,region,opts){
+  const o2=opts||{};
+  return `<div class="ph-art">${artFor(o.art)}</div>${photoHTML(o.img,o.n)}${o2.scrim?'<div class="ph-scrim"></div>':''}`;
+}
+const gradFor = region => `linear-gradient(140deg,${R[region].color},${shade(R[region].color)})`;
+
+/* ---------- TRANSPORT MODES ---------- */
+const MODES={
+  start:{label:"★ arrivée",color:"#7C6CE0"},
+  day:{label:"🚌 bus jour",color:"#15302C"},
+  night:{label:"🚌 bus nuit",color:"#15302C"},
+  boat:{label:"⛴ bus + bateau",color:"#1FA2D6"},
+  flight:{label:"✈ vol",color:"#E0673B"},
+  /* composite: a flight that lands back at a hub, then a night bus onward.
+     Needed for Leticia→Bogotá→Salento, which is one continuous transfer but
+     two modes — collapsing it to either one would misreport the trip. */
+  flightnight:{label:"✈ vol + bus nuit",color:"#E0673B"},
+};
+const LEG_TXT={day:"bus de jour",night:"bus de nuit",boat:"bus + bateau",flight:"vol",flightnight:"vol + bus de nuit"};
+const LEG_CLASS={day:"day",night:"night",boat:"boat",flight:"flight",flightnight:"flightnight"};
+
+/* ---------- ITINERARY (main stops, in order) ----------
+   Reordered 2026-07: Leticia moved right after the Bogotá arrival, as a direct
+   round-trip flight (Bogotá↔Leticia, no layover) instead of the old
+   Medellín→Leticia→Cartagena bridge. That bridge used to cover 4 flight legs
+   (each connecting through Bogotá); the round trip covers the Amazon in 2
+   direct legs. The distance it used to cover for free — Antioquia to the
+   Caribbean coast — is now a night bus, Medellín→Cartagena, which is why the
+   final Bogotá stay drops from 3 to 2 nights (still 21 nights total: the
+   night bus adds a travel-only night that has to come from somewhere). */
+const STOPS=[
+  {r:"andes", n:"Bogotá — arrivée", short:"Bogotá", art:"andes", img:"bogota", dates:"15 août", nights:1, arrive:"start", legDetail:"", ll:[4.7110,-74.0721],
+   note:"Arrivée le 15 à 19h25. Une nuit sur place pour souffler et s'acclimater à 2 600 m — La Candelaria et le Musée de l'Or attendront le retour.",
+   tip:"Une seule nuit ici à l'aller : garde La Candelaria, Monserrate et Zipaquirá pour l'étape retour du 4 septembre, où vous repasserez par Bogotá."},
+
+  {r:"amazon", n:"Leticia & l'Amazonie", short:"Leticia", art:"amazon", img:"leticia", dates:"16–19 août", nights:3, arrive:"flight", legDetail:"vol direct Bogotá→Leticia, ~2h (aucune correspondance)", ll:[-4.2032,-69.9359],
+   note:"La grande exception avion du voyage : Leticia n'est reliée à rien par la route. Triple-frontière Colombie/Brésil/Pérou, fleuve Amazone, dauphins roses, réserve d'Amacayacu.",
+   tip:"Prends le vol retour du 19 le plus tôt possible : c'est lui qui conditionne toute la journée, puisqu'il enchaîne le soir même sur le bus de nuit vers Salento.",
+   subs:[{n:"Puerto Nariño & lac Tarapoto", art:"amazon", img:"puerto-narino", ll:[-3.7889,-70.3556], note:"Excursion bateau d'une demi-journée à une journée : village sans voitures, dauphins roses, parc Amacayacu."}]},
+
+  {r:"cafe", n:"Salento & Cocora", short:"Salento", art:"cafe", img:"salento", dates:"20–21 août", nights:1, arrive:"flightnight", legDetail:"vol Leticia→Bogotá le 19 en journée, puis bus de nuit Bogotá→Salento (nuit du 19 au 20)", ll:[4.6374,-75.5703],
+   note:"Escale express dans la zone café : les palmiers à cire géants de Cocora, les fincas, le pueblo coloré. Une seule nuit, c'est le passage le plus serré du séjour.",
+   tip:"Avec une seule nuit, il faut choisir : Cocora le 20 au matin (départ tôt en Willys), déjeuner à Salento, et le bus pour Medellín le 21 au matin. Une finca de café en plus ne rentre pas.",
+   subs:[{n:"Vallée de Cocora", art:"cafe", img:"cocora", ll:[4.6377,-75.4891], note:"Les palmiers à cire de 60 m, arbre national. Boucle de rando depuis Salento, jeeps Willys sur la place."}]},
+
+  {r:"antioquia", n:"Medellín", short:"Medellín", art:"antioquia", img:"medellin", dates:"21–24 août", nights:3, arrive:"day", legDetail:"bus de jour Salento/Armenia→Medellín ~6h", ll:[6.2476,-75.5658],
+   note:"Comuna 13 & street art, métrocâble au-dessus de la vallée, Pueblito Paisa. Trois nuits pleines dans la ville du printemps éternel, sans excursion à caser.",
+   tip:"Guatapé n'est plus une excursion à la journée depuis ici : vous y dormez le 24. Vous pouvez donc consacrer les trois jours entiers à Medellín même."},
+
+  {r:"antioquia", n:"Guatapé & le Peñón", short:"Guatapé", art:"lake", img:"guatape", dates:"24–25 août", nights:1, arrive:"day", legDetail:"bus court Medellín→Guatapé ~1h30 (terminal Nord)", ll:[6.2330,-75.1588],
+   note:"Le village le plus coloré du pays, ses zócalos peints, et les 740 marches du monolithe pour une vue à 360° sur le lac. Dormir sur place, c'est avoir le village au calme le soir et le Peñón tôt le matin, sans la foule des bus du jour.",
+   tip:"Grimpe le Peñón à l'ouverture (vers 8h) le 25 avant de repartir : c'est le seul créneau sans queue, et vous avez la journée pour redescendre à Medellín prendre le bus de nuit."},
+
+  /* One numbered étape, three separate places to sleep — hence the dated `subs`.
+     Splitting it into three STOPS entries would show 10 étapes instead of 8. */
+  {r:"caraibe", n:"Cartagena & les îles", short:"Cartagena", art:"colonial", img:"cartagena", dates:"26 août – 1 sept.", nights:6, arrive:"night", legDetail:"retour Guatapé→Medellín ~1h30, puis bus de nuit Medellín→Cartagena ~12-14h (nuit du 25 au 26)", ll:[10.3932,-75.4832],
+   note:"Le plus long bloc du séjour : 6 nuits en descendant vers le sud, de la ville murée aux archipels. Remparts au coucher du soleil et Getsemaní le soir, puis deux îles de plus en plus au large.",
+   tip:"La remontée du 1er septembre est la journée la plus lourde du séjour : lancha depuis San Bernardo puis bus jusqu'à Santa Marta. Réserve la lancha directe vers Cartagena (~2h) plutôt que le combiné bateau + bus via Tolú, qui rallonge de 2 bonnes heures.",
+   subs:[
+     {n:"Cartagena — ville murée", art:"colonial", img:"cartagena", dates:"26–27 août", nights:2, ll:[10.4236,-75.5478], note:"Deux nuits intra-muros ou à Getsemaní, juste après le bus de nuit. Remparts, façades colorées, sortie du soir sans avoir à reprendre un bateau."},
+     {n:"Islas del Rosario", art:"island", img:"islas-rosario", dates:"28–29 août", nights:2, ll:[10.1783,-75.7500], note:"Parc national corallien à ~1h de lancha de Cartagena. Eau claire, éco-lodges sans voitures, plancton bioluminescent la nuit sur Isla Grande."},
+     {n:"Îles de San Bernardo", art:"island", img:"san-bernardo", dates:"30–31 août", nights:2, ll:[9.7363,-75.7437], note:"Le plus au large et le plus beau : Isla Múcura, Tintipán, Santa Cruz del Islote. Environ 1h30 de bateau depuis Rosario, en continuant vers le sud."},
+   ]},
+
+  {r:"caraibe", n:"Santa Marta & la Sierra", short:"Santa Marta", art:"sierra", img:"santa-marta", dates:"1–4 sept.", nights:3, arrive:"day", legDetail:"bus de jour Cartagena→Santa Marta ~4-5h", ll:[11.2404,-74.2110],
+   note:"Dernier camp de base caraïbe, en base groupée unique. D'ici, on rayonne à la journée : Minca dans la montagne, Tayrona sur la mer, Taganga pour le coucher de soleil.",
+   tip:"Priorise Tayrona si le temps presse : c'est l'expérience la plus forte du trio Minca/Tayrona/Taganga.",
+   subs:[
+     {n:"Minca", art:"sierra", img:"minca", ll:[11.1428,-74.1167], note:"Village de montagne : cascades, fermes de café et de cacao, lever de soleil sur la Sierra Nevada."},
+     {n:"Parc Tayrona", art:"sierra", img:"tayrona", ll:[11.3064,-74.0658], note:"Jungle qui plonge dans la mer, Cabo San Juan et La Piscina. Arrive tôt, la chaleur monte vite."},
+     {n:"Taganga", art:"island", img:"taganga", ll:[11.2685,-74.1871], note:"Village de pêcheurs, plongée abordable, coucher de soleil sur la baie."},
+   ]},
+
+  {r:"andes", n:"Bogotá — départ", short:"Bogotá", art:"city", img:"bogota-depart", dates:"4–5 sept.", nights:1, arrive:"flight", legDetail:"vol direct Santa Marta→Bogotá le 4 en journée, ~1h30 (plus de bus de nuit au retour)", ll:[4.7110,-74.0721],
+   note:"Retour par les airs plutôt qu'un bus de 17h : la dernière journée reste utilisable. Une nuit à Bogotá, puis le vol international du 5 à 21h35 — de quoi faire La Candelaria ou Monserrate le 5.",
+   tip:"Avec une seule nuit et un vol le soir du 5, dors près de l'aéroport ou dans un quartier bien relié (Chapinero, Teusaquillo) plutôt qu'au cœur de La Candelaria."},
+];
+
+/* ---------- PER-STOP DETAIL (kept out of STOPS so the itinerary data stays untouched) ----------
+   budget.eur = chambre double milieu de gamme, par nuit, pour deux — estimation
+   indicative hors repas et activités. weather = moyennes saisonnières fin août. */
+const DETAILS=[
+  {travel:"Vol d'arrivée",        travelSub:"atterrissage 19h25 à El Dorado",
+   budget:{eur:45,level:2,note:"une seule nuit — proche aéroport ou Chapinero"},
+   weather:{t:"19° / 9°",note:"frais à 2 600 m, averses en fin de journée"}},
+  {travel:"Vol ≈ 2 h",            travelSub:"Bogotá→Leticia, direct, sans correspondance",
+   budget:{eur:55,level:2,note:"plus cher : tout arrive par avion ou par le fleuve"},
+   weather:{t:"31° / 22°",note:"humide, eaux basses en août — bon pour marcher"}},
+  {travel:"Vol 2 h + bus de nuit",travelSub:"Leticia→Bogotá le 19, puis bus de nuit →Salento",
+   budget:{eur:40,level:1,note:"l'étape la moins chère — mais une seule nuit"},
+   weather:{t:"23° / 12°",note:"éclaircies, averses courtes l'après-midi"}},
+  {travel:"Bus ≈ 6 h",            travelSub:"bus de jour Salento/Armenia→Medellín",
+   budget:{eur:48,level:2,note:"chambre double, Laureles / El Poblado"},
+   weather:{t:"27° / 17°",note:"printemps permanent, ondées l'après-midi"}},
+  {travel:"Bus ≈ 1 h 30",         travelSub:"Medellín→Guatapé, terminal Nord",
+   budget:{eur:42,level:1,note:"petit village : bon rapport qualité/prix hors saison haute"},
+   weather:{t:"24° / 14°",note:"plus frais qu'à Medellín (1 900 m), ciel changeant sur le lac"}},
+  {travel:"Bus de nuit ≈ 12–14 h",travelSub:"retour Medellín ~1h30, puis bus de nuit →Cartagena",
+   budget:{eur:"70–85",level:3,note:"ville ~70 € ; les îles montent vers 85 € en formule"},
+   weather:{t:"32° / 26°",note:"chaud et humide, grosses averses brèves, mer à ~29°"}},
+  {travel:"Bus ≈ 4–5 h",          travelSub:"bus de jour Cartagena→Santa Marta",
+   budget:{eur:50,level:2,note:"chambre double, centre ou El Rodadero"},
+   weather:{t:"33° / 26°",note:"le plus chaud du voyage ; Minca reste frais en altitude"}},
+  {travel:"Vol ≈ 1 h 30",         travelSub:"vol direct Santa Marta→Bogotá le 4",
+   budget:{eur:45,level:2,note:"une nuit, proche de l'aéroport pour le vol du 5 au soir"},
+   weather:{t:"19° / 9°",note:"frais et venteux, pluie possible début septembre"}},
+];
+
+/* ---------- LODGING ----------
+   Deliberately NOT a list of named hotels. Airbnb and Booking render prices and
+   availability client-side behind a session, so any specific listing quoted here
+   would be unverifiable and stale within days. Instead each entry builds a
+   *pre-filtered search URL*: exact dates, 2 adults, EUR, a price band per
+   category, and a room-type filter that excludes shared rooms. What you click is
+   live data, and the tool stays useful after the trip is booked.
+
+   TRIP YEAR — the itinerary only ever stores day + month, so the year lives here
+   and nowhere else. Change YEAR if the trip moves. */
+const YEAR=2026;
+const CATS=[
+  {key:"abordable", label:"Abordable", color:"#4C9F70",
+   band:"≤ 45 €/nuit", min:null, max:45, rooms:["Entire home/apt"]},
+  {key:"confort", label:"Haut du budget", color:"#C98A2E",
+   band:"55–80 €/nuit", min:55, max:80, rooms:["Entire home/apt"]},
+  {key:"original", label:"Original", color:"#7C6CE0",
+   band:"45–80 €/nuit", min:45, max:80, rooms:["Entire home/apt","Private room"]},
+];
+/* WHAT THESE URLS CAN AND CANNOT PRE-SET — verified live in a real browser,
+   août 2026, not assumed:
+     ✓ location, check-in / check-out, 2 adults / 1 room, currency EUR
+     ✗ price band  — tested 3 param shapes on Airbnb (price_max alone,
+                     + price_filter_input_type/num_nights, + search_type=
+                     filter_change) and 2 on Booking (nflt=price=EUR-min-45-1
+                     and EUR-0-45-1). None applied: Airbnb kept reporting
+                     "Filtres appliqués : dates, 2 voyageurs" and both kept
+                     returning over-cap listings.
+     ✗ room type   — likewise absent from Airbnb's applied-filter list.
+   So the price cap and the no-shared-room rule are surfaced as an explicit
+   on-screen step instead of being silently dropped into a query string.
+   Airbnb wants ", " as "--" in its path segment, otherwise it renders the
+   literal "%2C" in its own UI. */
+function airbnbSlug(loc){ return encodeURIComponent(loc.replace(/,\s*/g,"--")); }
+function airbnbURL(place,cat){
+  const q=new URLSearchParams({
+    checkin:place.checkin, checkout:place.checkout, adults:"2", currency:"EUR",
+  });
+  q.set("refinement_paths[]","/homes");
+  const loc=(cat.key==="original"&&place.searchOriginal)||place.search;
+  return `https://www.airbnb.fr/s/${airbnbSlug(loc)}/homes?${q.toString()}`;
+}
+function bookingURL(place,cat){
+  const loc=(cat.key==="original"&&place.searchOriginal)||place.search;
+  return `https://www.booking.com/searchresults.fr.html?${new URLSearchParams({
+    ss:loc, checkin:place.checkin, checkout:place.checkout,
+    group_adults:"2", no_rooms:"1", group_children:"0", selected_currency:"EUR",
+  }).toString()}`;
+}
+/* Deep links to one specific listing, dates pre-loaded. `ref` is an Airbnb room
+   id, or a booking.com /hotel/ path. */
+function pickURL(place,pick){
+  if(pick.airbnb) return `https://www.airbnb.fr/rooms/${pick.airbnb}?${new URLSearchParams({
+    check_in:place.checkin, check_out:place.checkout, adults:"2", currency:"EUR"}).toString()}`;
+  return `https://www.booking.com/hotel/${pick.booking}.fr.html?${new URLSearchParams({
+    checkin:place.checkin, checkout:place.checkout,
+    group_adults:"2", no_rooms:"1", group_children:"0", selected_currency:"EUR"}).toString()}`;
+}
+/* Prices and availability below were read off the live result pages on this
+   date. They are a snapshot, not a quote — the deep link always wins. */
+const CURATED_ON="5 août 2026";
+
+const LODGING=[
+  {stop:0, key:"bogota-in", name:"Bogotá — arrivée", nights:1,
+   checkin:`${YEAR}-08-15`, checkout:`${YEAR}-08-16`,
+   search:"Bogotá, Colombie", searchOriginal:"La Candelaria, Bogotá, Colombie",
+   areas:"Atterrissage à 19h25, départ le lendemain pour Leticia : la priorité est la proximité, pas le charme. <b>Fontibón / Salitre</b> pour être à 10 min d'El Dorado, <b>Chapinero</b> ou <b>Teusaquillo</b> pour un vrai quartier vivant à 25 min de l'aéroport. Évite La Candelaria pour cette nuit-là : c'est joli mais à 40 min, et vous arriverez fatigués.",
+   cats:{
+     abordable:{guide:"Airbnb plafonne autour de 50 € à Bogotá : la gamme « abordable » y est déjà très confortable. Pour une arrivée à 19h25 et un vol tôt le lendemain, j'ai priorisé la proximité aéroport.",
+       picks:[
+         {nom:"Appartement 101 à 5 min de l'aéroport", zone:"Fontibón", eur:29, note:"4,80", avis:245, airbnb:"1365980663701917223",
+          extra:"Superhôte. Le meilleur compromis prix / trajet pour cette nuit-là : appartement entier, 1 lit."},
+         {nom:"Appartement en face du centre commercial — Aéroport", zone:"Engativá", eur:37, note:"4,94", avis:52, airbnb:"1651131420459399460",
+          extra:"« Coup de cœur voyageurs », meilleure note de la tranche basse. Côté aéroport, en face du centre commercial."},
+         {nom:"Charmant appartement à côté du Musée de l'Or", zone:"Santa Fe", eur:39, note:"4,88", avis:135, airbnb:"1314649227081395099",
+          extra:"Si vous préférez le centre à l'aéroport : à pied du Musée de l'Or et de La Candelaria."},
+       ]},
+     confort:{guide:"Au-dessus de 55 €, Airbnb n'a presque plus rien à Bogotá — c'est Booking et l'hôtellerie qui prennent le relais, avec réception 24h et navette, précieux pour une arrivée tardive.",
+       picks:[
+         {nom:"NH Collection Bogotá WTC Royal", zone:"Salitre / World Trade Center", eur:68, note:"8,6", avis:1507, booking:"co/bogota-royal",
+          extra:"Chambre double supérieure. Côté aéroport, réception 24h — la valeur sûre pour une arrivée 19h25."},
+         {nom:"NH Collection Bogotá Terra 100 Royal", zone:"Zona 100 / Chicó", eur:69, note:"8,6", avis:686, booking:"co/terra-100-royal",
+          extra:"Chambre double supérieure. Quartier plus vivant le soir si vous voulez dîner dehors."},
+         {nom:"Santafe Boutique Hotel", zone:"Santa Fe", eur:70, note:"8,6", avis:403, booking:"co/santa-fe-boutique",
+          extra:"Suite Junior à ce prix — le plus d'espace des trois, esprit boutique plutôt que chaîne."},
+       ]},
+     original:{guide:"C'est à La Candelaria que Bogotá devient intéressante : maisons coloniales restaurées, balcons de bois, patios, terrasses sur les toits avec le Monserrate en face. Contrepartie : 40 min de l'aéroport.",
+       picks:[
+         {nom:"Balcons. La Candelaria", zone:"La Candelaria", eur:67, note:"4,89", avis:546, airbnb:"48218124",
+          extra:"546 avis à 4,89 — le plus éprouvé du lot. Les balcons de bois typiques du centre colonial."},
+         {nom:"Jardin. La Candelaria", zone:"La Candelaria", eur:67, note:"4,88", avis:576, airbnb:"48215522",
+          extra:"Même famille de logements, avec un jardin. 576 avis."},
+         {nom:"Beau studio lumineux @ Casa Rosada", zone:"La Candelaria", eur:71, note:"4,98", avis:58, airbnb:"1329675381123566728",
+          extra:"4,98 de moyenne, la meilleure note trouvée à Bogotá toutes catégories confondues."},
+       ]},
+   },
+   note:"Alternative « originale » à petit prix si le budget compte plus que le confort : <b>Belle maison avec terrasse et vue 360°</b> à La Candelaria, 30 €, 4,74 (38 avis). ⚠ Une seule nuit avec arrivée à 19h25 : vérifie l'heure limite d'arrivée, beaucoup de petits Airbnb à Bogotá refusent après 22h — c'est l'avantage des trois hôtels ci-dessus."},
+
+  {stop:1, key:"leticia", name:"Leticia & l'Amazonie", nights:3,
+   checkin:`${YEAR}-08-16`, checkout:`${YEAR}-08-19`,
+   search:"Leticia, Amazonas, Colombie", searchOriginal:"Puerto Nariño, Amazonas, Colombie",
+   areas:"Leticia est une petite ville : tout le centre est à distance de marche, et c'est là que se trouvent les agences pour les excursions fluviales. Le vrai choix, c'est <b>rester en ville</b> (pratique, climatisé, moins cher) ou <b>dormir en lodge sur le fleuve</b> (l'expérience, mais on se coupe des services).",
+   cats:{
+     abordable:{guide:"Le centre de Leticia est petit et tout se fait à pied. À ce prix on a déjà un logement entier avec climatisation — non négociable ici, il fait 31° et très humide.",
+       picks:[
+         {nom:"Chambre double avec climatisation", zone:"Centre de Leticia", eur:35, total:106, note:"4,94", avis:18, airbnb:"1491417455452532794",
+          extra:"Malgré son nom, c'est un logement entier avec 1 lit double. Meilleure note de la tranche basse."},
+         {nom:"Minimaliste Amazon", zone:"Leticia", eur:36, total:107, note:"4,82", avis:17, airbnb:"889355087756776458",
+          extra:"Appartement entier, 1 chambre / 2 lits. Sobre et bien noté."},
+         {nom:"BHB — ApartaHotel", zone:"Leticia", eur:39, total:118, note:"8,5", avis:254, booking:"co/batara-boutique-leticia",
+          extra:"Appartement entier 2 chambres. 254 avis : de loin le plus éprouvé de la tranche basse."},
+       ]},
+     confort:{guide:"C'est la gamme où la climatisation et le petit-déjeuner deviennent systématiques, et où l'on trouve une piscine — un vrai luxe après une journée sur le fleuve.",
+       picks:[
+         {nom:"Hotel Alto Amazonas", zone:"Leticia", eur:54, total:161, note:"9,1", avis:130, booking:"co/alto-amazonas",
+          extra:"Chambre double 1 grand lit, <b>petit-déjeuner compris</b>. 9,1 sur 130 avis — le meilleur rapport qualité/prix du lot."},
+         {nom:"Hotel Madreselva", zone:"Leticia", eur:58, total:175, note:"8,4", avis:945, booking:"co/madreselva-leticia1",
+          extra:"945 avis, la valeur la plus sûre de Leticia. Attention : la chambre proposée à ce tarif est une triple avec 1 simple + 1 double."},
+         {nom:"Family Amazon Minimalist", zone:"Leticia", eur:72, total:217, note:"9,0", avis:46, booking:"co/family-amazon-minimalist",
+          extra:"Appartement entier 2 chambres, noté 9,0. Le plus d'espace si vous voulez cuisiner sur place."},
+       ]},
+     original:{guide:"La catégorie la plus intéressante du voyage. Ici « original » veut dire quitter la ville : réserve naturelle, jungle, maloka. Contrepartie : moto-taxi ou colectivo pour rejoindre le centre, et pas toujours d'électricité 24h.",
+       picks:[
+         {nom:"Palmayacu — Refugio Amazónico", zone:"Reserva Natural Cerca Viva, km 11", eur:67, total:200, note:"8,9", avis:54, booking:"co/palmayacu-refugio-amazonico",
+          extra:"Vérifié : vraiment dans une réserve naturelle à 11 km de Leticia. Terrasse et patio sur jardin, salle de bain privative ; cuisine et salon partagés. Prévois le moto-taxi pour le centre."},
+         {nom:"Séjour dans la jungle à Moreda", zone:"Jungle, près de Leticia", eur:34, total:102, note:"5,0", avis:9, airbnb:"1593698232137411062",
+          extra:"5,0 de moyenne. Chambre privée avec salle de bain — l'exception « chambre privée » se justifie ici par le cadre."},
+         {nom:"Maloka — Casa do Xingu", zone:"Tabatinga, <b>Brésil</b>", eur:16, total:49, note:"5,0", avis:4, airbnb:"1388012603391221908",
+          extra:"Une vraie maloka pour 49 € les 3 nuits. ⚠ Côté brésilien de la frontière : Tabatinga est collée à Leticia, mais vérifie les formalités de sortie/entrée. Seulement 4 avis."},
+       ]},
+   },
+   note:"⚠ Offre très limitée : Leticia compte peu d'hébergements et août est haute saison — réserve tôt. Les prix affichés sont <b>par nuit, calculés depuis le total 3 nuits</b> que renvoient les plateformes. Les lodges les plus isolés (côté Puerto Nariño, lac Tarapoto) ne sont souvent pas sur Airbnb/Booking du tout et se réservent par WhatsApp : si l'Amazonie profonde vous tente, garde 1 nuit libre à réserver sur place."},
+
+  {stop:2, key:"salento", name:"Salento & Cocora", nights:1,
+   checkin:`${YEAR}-08-20`, checkout:`${YEAR}-08-21`,
+   search:"Salento, Quindío, Colombie",
+   areas:"Le pueblo est minuscule : tout est à 5 min à pied de la Calle Real et de la place d'où partent les jeeps Willys pour Cocora. Une seule nuit, arrivée du bus de nuit le 20 au matin et départ le 21 tôt — vise le centre, pas une finca isolée, sauf si l'expérience compte plus que le sommeil.",
+   cats:{
+     abordable:{guide:"L'étape la moins chère du voyage : logement entier bien noté dès 33 €. Avec une arrivée matinale en bus de nuit, demande un dépôt de bagages si la chambre n'est pas prête avant 15h.",
+       picks:[
+         {nom:"Studios La Baranda 1", zone:"Salento centre", eur:33, note:"4,83", avis:6, airbnb:"1611174298352494598",
+          extra:"Le moins cher en logement entier. ⚠ Seulement 6 avis — récent, donc moins éprouvé que les autres."},
+         {nom:"Cabane avec salle de bain privée", zone:"Salento", eur:38, note:"4,93", avis:94, airbnb:"998086555674928628",
+          extra:"Une vraie cabane, 1 lit double, 4,93 sur 94 avis. Le meilleur rapport charme/prix/fiabilité de l'étape."},
+         {nom:"Appartement privé central + cuisine", zone:"Salento centre", eur:39, note:"4,90", avis:41, airbnb:"1391321299294389606",
+          extra:"2 chambres, 2 lits doubles, cuisine et Wi-Fi. Pratique si vous voulez dîner sur place après Cocora."},
+       ]},
+     confort:{guide:"Au-dessus de 60 €, Salento offre des lofts et appartements plus spacieux — un peu superflu pour une seule nuit, mais utile si vous voulez vraiment récupérer du bus de nuit.",
+       picks:[
+         {nom:"Hope Aparta Lofts H5", zone:"Salento", eur:67, note:"4,78", avis:63, airbnb:"1307345539711679338",
+          extra:"Loft 1 chambre / 2 lits. Le plus classique du lot."},
+         {nom:"Spacieux appartement lumineux et charmant", zone:"Salento", eur:72, note:"4,83", avis:47, airbnb:"1617399219948618669",
+          extra:"Prévu pour 4 personnes — beaucoup d'espace à deux."},
+         {nom:"Salento Stay #306 — Privé, Jacuzzi, lit King", zone:"Salento", eur:75, note:"4,88", avis:239, airbnb:"49162058",
+          extra:"239 avis, jacuzzi privé et lit king. ⚠ C'est une suite privative <b>au sein d'un établissement type auberge</b> — privé et fermé, mais tu croiseras du monde dans les parties communes."},
+       ]},
+     original:{guide:"C'est ici que Salento se démarque : la zone café se prête au glamping et aux maisons paysannes. Le pueblo est assez petit pour que « à l'écart » reste à 10 min à pied.",
+       picks:[
+         {nom:"Hobbit Glamping — Luna Glamping", zone:"Salento", eur:74, note:"4,99", avis:110, airbnb:"1108015854403568179",
+          extra:"<b>4,99 sur 110 avis</b> — la meilleure note de tout le voyage. Glamping façon maison de hobbit. Si une seule folie doit être faite, c'est celle-là."},
+         {nom:"Maison « El canto de los gallos »", zone:"Salento", eur:46, note:"4,97", avis:59, airbnb:"1385738133247843594",
+          extra:"« Le chant des coqs » — maison entière, 2 chambres, 4,97. L'option la plus authentiquement locale."},
+         {nom:"Maison Entre Oiseaux", zone:"Salento", eur:42, note:"4,94", avis:128, airbnb:"46663067",
+          extra:"128 avis à 4,94. Chambre privée avec salle de bain, dans une maison tournée vers l'observation des oiseaux."},
+       ]},
+   },
+   note:"Rappel du planning : avec une seule nuit, la journée du 20 est entièrement prise par Cocora (départ tôt en Willys) et le retour. C'est l'étape où un logement au centre, à 2 min de la place des jeeps, vaut plus qu'une belle vue à 15 min."},
+
+  {stop:3, key:"medellin", name:"Medellín", nights:3,
+   checkin:`${YEAR}-08-21`, checkout:`${YEAR}-08-24`,
+   search:"Medellín, Colombie", searchOriginal:"Las Palmas, Medellín, Colombie",
+   areas:"Deux quartiers dominent. <b>El Poblado / Provenza</b> : le plus pratique et le plus animé, métro et restaurants à pied — mais bruyant le week-end. <b>Laureles / Manila</b> : plus calme et plus local, à une station de métro. Guatapé n'étant plus une excursion, les 3 jours sont entièrement pour la ville.",
+   cats:{
+     abordable:{guide:"⚠ À noter : sur 3 nuits en août, le plancher réel pour un logement entier correct à Medellín est autour de <b>46 €</b>, soit légèrement au-dessus du repère de 45 € de cette catégorie. En dessous, on tombe sur des chambres privées.",
+       picks:[
+         {nom:"Chambre privée, village", zone:"Manila", eur:31, total:94, note:"4,70", avis:47, airbnb:"1577820710459198001",
+          extra:"Le seul vrai « pas cher » de la sélection, dans le quartier calme de Manila. Note plus modeste (4,70)."},
+         {nom:"Loft Poblado — climatisation, WiFi rapide", zone:"El Poblado", eur:46, total:138, note:"4,82", avis:153, airbnb:"1152135982079745771",
+          extra:"153 avis. Le meilleur compromis emplacement / prix / fiabilité des trois nuits."},
+         {nom:"Bel appartement central, parking gratuit", zone:"El Tesoro", eur:48, total:145, note:"4,83", avis:133, airbnb:"669605800361971748",
+          extra:"133 avis. Un peu au-dessus de Poblado sur la colline, donc plus calme le soir."},
+       ]},
+     confort:{guide:"Provenza concentre les meilleures notes de la ville. À ce prix, la climatisation est systématique — utile à 1 500 m mais avec 27° en journée.",
+       picks:[
+         {nom:"Appartement lumineux — balcon Provenza", zone:"El Poblado / Provenza", eur:60, total:181, note:"4,71", avis:41, airbnb:"54206769",
+          extra:"Logement entier avec balcon, en plein Provenza."},
+         {nom:"Magnifique chambre Provenza n° 3", zone:"El Poblado / Provenza", eur:63, total:188, note:"4,98", avis:118, airbnb:"1062519802936703144",
+          extra:"<b>4,98 sur 118 avis</b>. Chambre privée : l'exception se justifie par la note et l'emplacement."},
+         {nom:"Chambre élégante Provenza + coworking", zone:"El Poblado / Provenza", eur:69, total:206, note:"4,89", avis:199, airbnb:"923903757802032133",
+          extra:"199 avis. Établissement type hôtel avec espace de coworking — pratique si tu dois bosser un peu."},
+       ]},
+     original:{guide:"Recherche honnête : <b>Medellín n'a pas de logement vraiment atypique dans ce budget</b>. L'offre est massivement composée d'appartements modernes. Ce qui sort du lot, ce sont les lofts perchés sur la colline de Las Palmas avec vue sur la vallée — beaux, mais des annonces récentes avec très peu d'avis. Je préfère te le dire que de compléter avec du médiocre pour arriver à trois.",
+       picks:[
+         {nom:"Superbe loft à Encanto, vue sur la ville", zone:"Las Palmas (colline)", eur:80, total:241, note:"5,0", avis:7, airbnb:"1655092240655581655",
+          extra:"Vue plongeante sur la vallée depuis Las Palmas. ⚠ 7 avis seulement, et sur la colline : prévois Uber/taxi pour descendre en ville."},
+         {nom:"Loft de luxe avec jacuzzi privé", zone:"El Poblado", eur:68, total:205, note:"5,0", avis:3, airbnb:"1679804794262329613",
+          extra:"⚠ 3 avis seulement — annonce très récente. À réserver seulement si les photos te convainquent."},
+       ]},
+   },
+   note:"L'« original » de Medellín, c'est la ville et pas la chambre : Comuna 13, métrocâble au-dessus de la vallée, Pueblito Paisa. Mets le budget sur l'emplacement (Provenza ou Laureles) plutôt que sur un logement insolite qui n'existe pas vraiment ici."},
+
+  {stop:4, key:"guatape", name:"Guatapé & le Peñón", nights:1,
+   checkin:`${YEAR}-08-24`, checkout:`${YEAR}-08-25`,
+   search:"Guatapé, Antioquia, Colombie",
+   areas:"Le village est petit et coloré : le <b>parc principal</b> et le <b>malecón</b> (front de lac) concentrent tout. Le Peñón est à 3 km — un moto-taxi ou un tuk-tuk suffit. Comme tu veux grimper à l'ouverture le 25, dormir côté village ou côté rocher change surtout ton réveil.",
+   cats:{
+     abordable:{guide:"Guatapé est très abordable et l'offre est dense en plein centre. À ce prix on a un logement entier avec vue sur le lac ou sur la place.",
+       picks:[
+         {nom:"Petit appartement parc principal", zone:"Parc principal", eur:30, note:"4,77", avis:182, airbnb:"21057480",
+          extra:"<b>182 avis</b> — le plus éprouvé de Guatapé, et le moins cher. En plein sur la place."},
+         {nom:"Appartement central entouré de jardins", zone:"Guatapé centre", eur:38, note:"4,94", avis:97, airbnb:"1401683123102699101",
+          extra:"4,94 sur 97 avis. Le meilleur équilibre note / prix / emplacement."},
+         {nom:"Cœur de Guatapé — plaza, malecón, arrêt de bus", zone:"Plaza / malecón", eur:42, note:"4,96", avis:53, airbnb:"1649499752355245097",
+          extra:"4,96. <b>À l'arrêt de bus</b> : très pratique puisque vous arrivez et repartez en bus depuis Medellín."},
+       ]},
+     confort:{guide:"La gamme haute à Guatapé, c'est la vue : appartements donnant sur le barrage ou belvédères privés, avec des notes remarquables.",
+       picks:[
+         {nom:"Belvédère privé au cœur de Guatapé", zone:"Guatapé centre", eur:59, note:"4,93", avis:82, airbnb:"1549316557494600957",
+          extra:"4,93 sur 82 avis, avec son propre point de vue."},
+         {nom:"Appartement sur le parc, vue barrage", zone:"Parc principal", eur:65, note:"4,98", avis:101, airbnb:"1461969542076640660",
+          extra:"<b>4,98 sur 101 avis</b> — la meilleure note de Guatapé, vue directe sur le barrage."},
+         {nom:"Appartement 1 chambre centre + petit déjeuner", zone:"Guatapé centre", eur:66, note:"4,98", avis:115, airbnb:"43785073",
+          extra:"4,98 sur 115 avis, <b>petit-déjeuner inclus</b> — pratique avant de grimper le Peñón tôt."},
+       ]},
+     original:{guide:"Guatapé est l'autre bonne étape pour du logement insolite : glamping et chalets face au lac, à quelques minutes du village.",
+       picks:[
+         {nom:"Repos sous la pierre du Peñol", zone:"Au pied du Peñón", eur:44, note:"5,0", avis:55, airbnb:"779914773854422971",
+          extra:"<b>5,0 sur 55 avis</b>, et littéralement au pied du monolithe — exactement ce qu'il faut pour être en haut à l'ouverture le 25 sans la foule."},
+         {nom:"Chalet face au lac, 8 min du parc", zone:"Bord du lac", eur:65, note:"4,82", avis:22, airbnb:"1703313991334844393",
+          extra:"Cabane en bois les pieds dans l'eau, à 8 min du village."},
+         {nom:"NOA Glamping Eucalipto — jacuzzi + petit déj.", zone:"Guatapé", eur:52, note:null, avis:0, airbnb:"1696070927341291024",
+          extra:"Glamping avec jacuzzi et petit-déjeuner. ⚠ Aucun avis pour l'instant : annonce neuve, à réserver seulement sur la foi des photos."},
+       ]},
+   },
+   note:"Le 25 vous redescendez à Medellín (~1h30) pour prendre le bus de nuit vers Cartagena le soir : un logement près de l'arrêt de bus ou du Peñón fait gagner une heure sur cette journée déjà chargée."},
+
+  {stop:5, key:"cartagena-ville", name:"Cartagena — ville murée", nights:2,
+   checkin:`${YEAR}-08-26`, checkout:`${YEAR}-08-28`,
+   search:"Cartagena de Indias, Colombie", searchOriginal:"Getsemani, Cartagena de Indias, Colombie",
+   areas:"Quatre quartiers, très différents. <b>Centro / San Diego</b> : intra-muros, le plus beau et le plus cher. <b>Getsemaní</b> : juste à côté des remparts, street art et vie nocturne, le meilleur rapport charme/prix. <b>Manga</b> : résidentiel et calme à 10 min à pied. <b>Crespo / Bocagrande</b> : bord de mer et piscines, mais loin du centre historique — Crespo est côté aéroport.",
+   cats:{
+     abordable:{guide:"Cartagena est l'étape la plus chère du voyage, mais Manga et les abords de Getsemaní restent très accessibles — et à 10 min à pied des remparts.",
+       picks:[
+         {nom:"Chambre boutique avec jardin — Manga 101", zone:"Manga", eur:26, total:51, note:"5,0", avis:22, airbnb:"1619658827243682848",
+          extra:"5,0 de moyenne pour 51 € les deux nuits. Chambre privée dans une maison à jardin, quartier calme."},
+         {nom:"Studio Caribe by Rosana", zone:"Manga", eur:39, total:78, note:"4,91", avis:270, airbnb:"26109793",
+          extra:"<b>270 avis à 4,91</b> — le plus éprouvé de la tranche basse. Studio privé indépendant."},
+         {nom:"Logement proche du centre historique", zone:"Carthagène", eur:40, total:79, note:"4,92", avis:48, airbnb:"1571236592218912579",
+          extra:"Logement entier à 4,92, à distance de marche des remparts."},
+       ]},
+     confort:{guide:"C'est la gamme où l'on peut dormir <b>intra-muros</b> ou avoir une piscine. Attention au compromis : les meilleures piscines sont à Crespo, côté aéroport, à 15 min en taxi du centre historique.",
+       picks:[
+         {nom:"Chambres Serrezuela 5", zone:"San Diego (intra-muros)", eur:57, total:114, note:"4,76", avis:156, airbnb:"1107158643717715176",
+          extra:"156 avis. <b>Dans les murs</b>, à côté du centre commercial Serrezuela — l'emplacement le plus central de la sélection."},
+         {nom:"Appartement / complexe hôtelier vue mer", zone:"Crespo", eur:71, total:141, note:"4,95", avis:78, airbnb:"1490601248972149124",
+          extra:"4,95 sur 78 avis, piscine et vue mer. ⚠ Crespo, donc côté aéroport : 15 min de taxi pour la ville murée."},
+         {nom:"Appartement méditerranéen CB510", zone:"Crespo", eur:73, total:145, note:"5,0", avis:41, airbnb:"1471124605959924858",
+          extra:"5,0 sur 41 avis. Même remarque : très confortable, mais loin du centre historique."},
+       ]},
+     original:{guide:"Cartagena est l'étape où « original » est le plus facile à trouver : maisons coloniales à patio dans les murs, et balcons de Getsemaní.",
+       picks:[
+         {nom:"CAREX à Casa Helda — Casa Colonial", zone:"Centro (intra-muros)", eur:42, total:84, note:"4,96", avis:387, airbnb:"553400142799120148",
+          extra:"<b>4,96 sur 387 avis</b> — de très loin le plus éprouvé de tout le voyage. Une vraie maison coloniale dans les murs, pour 84 € les deux nuits. Le meilleur rapport charme/prix/fiabilité que j'ai trouvé."},
+         {nom:"Chambre Getsemaní — balcon & climatisation", zone:"Getsemaní", eur:53, total:106, note:"4,83", avis:60, airbnb:"1597163331584183853",
+          extra:"Salle de bain privée, clim et mini-balcon en plein Getsemaní — le quartier où sortir le soir."},
+         {nom:"Bord de mer • Piscine • Concierge 24h/24", zone:"Crespo", eur:80, total:159, note:"4,92", avis:65, airbnb:"1226202150524690282",
+          extra:"Le haut du plafond : bord de mer, piscine, conciergerie. ⚠ Côté aéroport, pas centre historique."},
+       ]},
+   },
+   note:"Vous arrivez le 26 au matin après le bus de nuit depuis Medellín : privilégie un hébergement acceptant l'arrivée tôt ou gardant les bagages. Le 28 vous embarquez pour les Islas del Rosario — les départs de lanchas se font au <b>Muelle de la Bodeguita</b>, à côté de la ville murée, donc dormir au centre ou à Getsemaní simplifie ce matin-là."},
+
+  {stop:5, key:"rosario", name:"Islas del Rosario", nights:2,
+   checkin:`${YEAR}-08-28`, checkout:`${YEAR}-08-30`,
+   search:"Islas del Rosario, Bolívar, Colombie",
+   areas:"Presque tout se concentre sur <b>Isla Grande</b>, la seule île avec plusieurs hébergements, des chemins à pied et la Laguna Encantada (plancton bioluminescent la nuit). Pas de voitures, pas de distributeur : prévois du cash. La lancha part du Muelle de la Bodeguita à Cartagena, ~1h.",
+   cats:{
+     abordable:{guide:"⚠ Constat de la recherche : <b>Rosario est hors budget</b>. Sur 18 annonces Airbnb aux tes dates, 12 dépassent 82 €/nuit et la fourchette monte jusqu'à 494 €. Côté Booking, 23 résultats sur 25 crèvent le plafond. Une seule option correcte tient sous 45 €.",
+       picks:[
+         {nom:"Chambre Laguna — Art et Aventure Ecohotel", zone:"Isla Grande", eur:39, total:78, note:"4,58", avis:31, airbnb:"20066242",
+          extra:"Le seul hébergement sous 45 € trouvé sur l'île. Note plus modeste (4,58) mais c'est le prix d'entrée pour dormir sur Rosario."},
+       ]},
+     confort:{guide:"C'est la vraie fourchette de Rosario. Les « Barracuda » sont deux chalets insulaires du même hôte sur Isla Grande — les valeurs les plus sûres de l'archipel dans ce budget.",
+       picks:[
+         {nom:"Chambre spectaculaire, salle de bain privée, vue mer", zone:"Isla Grande", eur:58, total:116, note:"5,0", avis:8, airbnb:"1693552659732521207",
+          extra:"5,0 de moyenne, mais seulement 8 avis. Vue mer directe."},
+         {nom:"Barracuda 1 — chalet insulaire", zone:"Isla Grande", eur:66, total:132, note:"4,59", avis:39, airbnb:"52278179",
+          extra:"Chalet en bois sur l'île. 39 avis, note correcte sans être excellente."},
+         {nom:"Barracuda 2 — chalet insulaire", zone:"Isla Grande", eur:72, total:144, note:"4,83", avis:41, airbnb:"46721888",
+          extra:"Le mieux noté des deux Barracuda (4,83 / 41 avis) — mon choix par défaut si tu veux dormir sur Rosario."},
+       ]},
+     original:{guide:"Sur Rosario, l'insolite <b>est</b> le standard : tout est bungalow, chalet ou écolodge sans voiture. La catégorie se confond donc avec la précédente — je ne la remplis pas artificiellement.",
+       picks:[
+         {nom:"Bungalow romantique, pour 2", zone:"Islas del Rosario", eur:77, total:154, note:null, avis:0, airbnb:"1232586420645280461",
+          extra:"Bungalow pensé pour deux, le plus haut de gamme sous plafond. ⚠ Aucun avis à ce jour : annonce neuve, à réserver sur la foi des photos seulement."},
+       ]},
+   },
+   note:"⚠ <b>C'est l'étape la plus contrainte du séjour.</b> Si le plafond de 80 € est ferme, tu n'as réellement que 5 options sur toute l'archipel, dont une seule sous 45 €. Deux issues : accepter ~70-80 €/nuit ici (et compenser ailleurs, Guatapé et Salento sont très bon marché), ou remplacer Rosario par <b>Barú</b>, relié par la route, où l'offre est bien plus large et moins chère."},
+
+  {stop:5, key:"san-bernardo", name:"Îles de San Bernardo", nights:2,
+   checkin:`${YEAR}-08-30`, checkout:`${YEAR}-09-01`,
+   search:"Rincon del Mar--Sucre--Colombie", searchOriginal:"Isla Tintipan--Colombie",
+   areas:"Distinction essentielle : <b>dormir sur les îles</b> (Múcura, Tintipán) coûte cher et l'offre est minuscule, ou <b>dormir à Rincón del Mar</b>, le village de pêcheurs sur le continent d'où partent les lanchas — bien moins cher, très charmant, avec sorties bateau à la journée. Attention aux résultats trompeurs : « San Bernardo del Viento », Coveñas et El Porvenir sont sur le continent, à des dizaines de km au sud.",
+   cats:{
+     abordable:{guide:"À ce prix, c'est Rincón del Mar : village de pêcheurs sans bitume, hamacs et lanchas. Les îles, elles, ne descendent pas sous 79 €.",
+       picks:[
+         {nom:"Refuge entouré de mangrove, plage et mer", zone:"San Bernardo del Viento", eur:45, total:90, note:"4,71", avis:17, airbnb:"1577800164744651000",
+          extra:"⚠ Attention à la géographie : San Bernardo del Viento est dans le Córdoba, très au sud de l'archipel — à ne prendre que si tu acceptes de renoncer aux îles."},
+         {nom:"Auberge Casa en la Ciénaga", zone:"Rincón del Mar", eur:46, total:91, note:"4,79", avis:28, airbnb:"1326932701471231771",
+          extra:"Dans le bon village de départ pour les îles. Maison d'hôtes, 4,79 sur 28 avis."},
+       ]},
+     confort:{guide:"La bonne zone de prix pour Rincón del Mar : cabanes et écolodges les pieds dans l'eau, avec les sorties bateau vers Múcura et Tintipán organisées sur place.",
+       picks:[
+         {nom:"La Bita Ecolodge & Dive 2", zone:"Rincón del Mar", eur:55, total:109, note:"5,0", avis:16, airbnb:"1409499931639677600",
+          extra:"5,0 de moyenne. Écolodge avec centre de plongée — pratique pour les sorties snorkeling."},
+         {nom:"Cabane pour 2 personnes", zone:"Rincón del Mar", eur:60, total:120, note:"4,89", avis:115, airbnb:"28388141",
+          extra:"<b>115 avis à 4,89</b> — de loin le plus éprouvé du secteur. Cabane privée pour deux."},
+         {nom:"Plage à 80 m, piscine, wifi", zone:"Coveñas", eur:65, total:130, note:"4,93", avis:80, airbnb:"1329281432772103064",
+          extra:"4,93 sur 80 avis, avec piscine. ⚠ Coveñas est sur le continent au sud, pas sur l'archipel."},
+       ]},
+     original:{guide:"Une seule vraie option insulaire tient sous le plafond. C'est l'expérience que tu es venu chercher — eau turquoise, pas de route, pas de voiture — mais l'offre est extrêmement mince.",
+       picks:[
+         {nom:"Habitación privée, face à la mer", zone:"Isla Tintipán", eur:79, total:158, note:"4,75", avis:12, airbnb:"1005302471624564698",
+          extra:"<b>Le seul hébergement réellement sur les îles</b> sous 80 €. Chambre privée face à la mer sur Tintipán. 12 avis seulement — mais c'est ça ou le continent."},
+       ]},
+   },
+   note:"Rappel logistique : le 1ᵉʳ septembre vous remontez vers Santa Marta. Depuis <b>Rincón del Mar</b> c'est plus simple (pas de bateau à prendre le matin) que depuis une île. Si tu dors sur Tintipán, réserve la lancha directe vers Cartagena la veille."},
+
+  {stop:6, key:"santa-marta", name:"Santa Marta & la Sierra", nights:3,
+   checkin:`${YEAR}-09-01`, checkout:`${YEAR}-09-04`,
+   search:"Santa Marta, Magdalena, Colombie", searchOriginal:"Taganga, Santa Marta, Colombie",
+   areas:"<b>Centro histórico</b> : le plus pratique pour les bus vers Minca et Tayrona, et pour dîner à pied. <b>El Rodadero / Gaira</b> : plage et immeubles, plus familial, 15 min du centre. <b>Taganga</b> : village de pêcheurs dans une baie à 10 min, le plus joli au coucher de soleil mais plus isolé le soir.",
+   cats:{
+     abordable:{guide:"Santa Marta est très abordable sur 3 nuits, avec plusieurs annonces à très gros volume d'avis — de quoi réserver sans mauvaise surprise.",
+       picks:[
+         {nom:"Rodadero Santa Marta — chambre supérieure", zone:"Gaira / El Rodadero", eur:24, total:71, note:"4,73", avis:548, airbnb:"572618454452255569",
+          extra:"<b>548 avis</b> et 71 € les trois nuits : le meilleur rapport prix/fiabilité de tout le voyage."},
+         {nom:"Appartement artistique à deux pas de la baie", zone:"Santa Marta", eur:36, total:107, note:"4,75", avis:198, airbnb:"27727769",
+          extra:"198 avis. Logement entier, proche du front de mer."},
+         {nom:"Esprit tropical dans le centre", zone:"Centro histórico", eur:37, total:110, note:"4,89", avis:254, airbnb:"861444162943788358",
+          extra:"<b>254 avis à 4,89</b> et en plein centre — le meilleur équilibre des trois pour rayonner vers Minca et Tayrona."},
+       ]},
+     confort:{guide:"Ici le budget achète la vue et la piscine. Utile : c'est l'étape la plus chaude du voyage (33°), une piscine en fin de journée change tout.",
+       picks:[
+         {nom:"G.927 Suite de luxe — Playa Salguero", zone:"Gaira / Playa Salguero", eur:55, total:165, note:"5,0", avis:37, airbnb:"1604536010733765074",
+          extra:"5,0 sur 37 avis, à quelques pas de la plage."},
+         {nom:"Ocean View — piscine sur le toit et jacuzzi", zone:"Santa Marta", eur:56, total:169, note:"4,97", avis:33, airbnb:"1521060129208305582",
+          extra:"<b>4,97</b>, piscine sur le toit et jacuzzi. Le meilleur choix « récupération » après Tayrona."},
+         {nom:"Studio EIRA 179 — vue sur la mer", zone:"Santa Marta", eur:79, total:236, note:"4,96", avis:23, airbnb:"1604556120839355109",
+          extra:"4,96, vue mer plein cadre. Le haut du plafond."},
+       ]},
+     original:{guide:"L'originalité ici, c'est Taganga : une baie de pêcheurs encaissée, à 10 min du centre, où le coucher de soleil est le meilleur de la côte.",
+       picks:[
+         {nom:"Vue fantastique sur la mer + petit déjeuner", zone:"Taganga", eur:49, total:146, note:"4,95", avis:218, airbnb:"959484111096582390",
+          extra:"<b>4,95 sur 218 avis</b>, vue mer et <b>petit-déjeuner inclus</b>, à Taganga. Ma recommandation n° 1 pour cette étape."},
+         {nom:"Aguamarina — Loft Buritaca", zone:"Taganga", eur:71, total:212, note:"4,89", avis:98, airbnb:"919652415181185690",
+          extra:"98 avis à 4,89. Loft dans la baie de Taganga."},
+         {nom:"Hôtel Casa Encantada — chambre privée", zone:"Santa Marta", eur:47, total:141, note:"4,95", avis:38, airbnb:"1356659856720899499",
+          extra:"« La maison enchantée » — 4,95 sur 38 avis. Chambre privée dans un petit hôtel de caractère."},
+       ]},
+   },
+   note:"Base groupée unique comme convenu : d'ici vous rayonnez à la journée vers Minca (montagne, ~45 min) et Tayrona (~1h, arriver tôt). Si vous priorisez Tayrona, dormir au <b>centre</b> ou à <b>Taganga</b> facilite les départs matinaux ; El Rodadero est plus loin des terminaux de bus."},
+
+  {stop:7, key:"bogota-out", name:"Bogotá — départ", nights:1,
+   checkin:`${YEAR}-09-04`, checkout:`${YEAR}-09-05`,
+   search:"Bogotá, Colombie", searchOriginal:"La Candelaria, Bogotá, Colombie",
+   areas:"Situation inverse de l'aller : vous arrivez en <b>avion</b> le 4 en journée et le vol international est le 5 à 21h35. Vous avez donc toute la journée du 5 libre — c'est le moment de faire La Candelaria, Monserrate ou Zipaquirá. Dormir au centre devient un vrai avantage, contrairement à la nuit d'arrivée.",
+   cats:{
+     abordable:{guide:"Bogotá reste la ville la moins chère du séjour, et cette fois le centre a du sens : vous avez la journée du 5 pour en profiter avant le vol du soir.",
+       picks:[
+         {nom:"Appartement 101 à 5 min de l'aéroport", zone:"Fontibón", eur:29, note:"4,80", avis:245, airbnb:"1365980663701917223",
+          extra:"Le même qu'à l'aller, toujours à 29 €. À choisir si tu préfères zéro stress logistique au vol du soir."},
+         {nom:"B-Cozy Loft près de Monserrate", zone:"Santa Fe", eur:31, note:"4,73", avis:553, airbnb:"606511386530800154",
+          extra:"<b>553 avis.</b> À deux pas du funiculaire de Monserrate — idéal pour la matinée du 5."},
+         {nom:"Loft calme avec balcon et vue sur les montagnes", zone:"La Castellana", eur:34, note:"4,82", avis:51, airbnb:"1629232445892165387",
+          extra:"Quartier résidentiel calme, balcon avec vue sur les cerros."},
+       ]},
+     confort:{guide:"⚠ À savoir : le plafond réel d'Airbnb à Bogotá est autour de <b>67 €</b>. Au-delà, il faut passer par l'hôtellerie (les NH Collection et Santafe Boutique vus à l'étape 1). Ici, monter en budget achète surtout du volume d'avis et des équipements, pas du prix.",
+       picks:[
+         {nom:"72Hub by Jalo — piscine et salle de sport", zone:"Barrios Unidos", eur:45, note:"4,69", avis:6248, airbnb:"33186477",
+          extra:"<b>6 248 avis</b> — l'annonce la plus massivement testée de tout le voyage. Piscine et salle de sport comprises."},
+         {nom:"Studio Loft confortable à La Candelaria", zone:"La Candelaria", eur:46, note:"4,88", avis:477, airbnb:"23902018",
+          extra:"477 avis à 4,88, en plein centre colonial."},
+         {nom:"Balcons. La Candelaria", zone:"La Candelaria", eur:67, note:"4,89", avis:546, airbnb:"48218124",
+          extra:"546 avis. Le haut du marché Airbnb à Bogotá, dans une maison coloniale à balcons."},
+       ]},
+     original:{guide:"Pour la dernière nuit, La Candelaria a plusieurs maisons coloniales avec des volumes d'avis rassurants — et vous êtes à pied de tout ce qu'il vous reste à voir.",
+       picks:[
+         {nom:"Emplacement parfait dans La Candelaria !", zone:"La Candelaria", eur:39, note:"4,86", avis:579, airbnb:"11566250",
+          extra:"<b>579 avis</b> à 4,86 pour 39 € — le meilleur rapport centre-historique/prix/fiabilité de Bogotá."},
+         {nom:"Nouvel équipement 501 — belle vue, balcon", zone:"Puente Aranda", eur:37, note:"4,99", avis:94, airbnb:"1487427132717293314",
+          extra:"<b>4,99 sur 94 avis</b> — la meilleure note de Bogotá. Quartier moins touristique."},
+       ]},
+   },
+   note:"Le vol du 5 est à 21h35 : compte 3h avant, donc départ vers l'aéroport ~18h. Tu peux garder les bagages presque partout et occuper la journée. Zipaquirá (cathédrale de sel) fait un aller-retour de ~5h depuis le nord de Bogotá — jouable, mais serré si tu veux aussi voir La Candelaria."},
+];
+
+/* ---------- LATER: what-if suggestions with implications ---------- */
+const LATER=[
+  {r:"iles", n:"San Andrés", art:"island", img:"san-andres", ll:[12.5450,-81.7076],
+   note:"La « mer aux sept couleurs ». Johnny Cay, El Acuario, tour de l'île en buggy/vélo, culture raizal créole.",
+   implies:"2 vols supplémentaires : île à 750 km au large, sans ferry passager. Le plan en compte déjà 3, ça monterait à 5.",
+   recommend:"Le glisser en toute fin, en escale sur le retour : Santa Marta→San Andrés puis San Andrés→Bogotá, à la place du vol direct du 4 septembre.",
+   swap:"À compenser sur le bloc Cartagena & les îles (6 nuits) : en retirer 2 ou 3 suffit, sans toucher au reste."},
+  {r:"darien", n:"Capurganá", art:"island", img:"capurgana", ll:[8.6341,-77.3491],
+   note:"Bout du monde caribéen à la frontière du Panamá — zéro route, on arrive en lancha depuis Necoclí ou Turbo.",
+   implies:"~1 journée complète de bus + bateau pour y accéder (aucune route), et pas de distributeur sur place — à anticiper en cash.",
+   recommend:"Le greffer entre Cartagena et Santa Marta comme détour de 3-4 nuits, en acceptant de rallonger le séjour total.",
+   swap:"À prendre sur le bloc Cartagena & les îles plutôt qu'en plus : c'est la même famille d'étape « île/archipel », les cumuler est redondant sur 21 nuits."},
+  {r:"cafe", n:"Désert de la Tatacoa", art:"sierra", img:"tatacoa", ll:[3.2324,-75.1688],
+   note:"Labyrinthes d'argile rouge (Cuzco) et gris, ciel très pur pour observer les étoiles.",
+   implies:"Détour vers le sud (bus Bogotá↔Neiva ~4-5h chacun) qui casse la logique de boucle nord du reste du voyage.",
+   recommend:"Le caler en tout début, avant de filer vers l'Amazonie : 2 nuits au retour de Neiva, en décalant le vol pour Leticia.",
+   swap:"À compenser en retirant 1 nuit à Medellín et 1 nuit sur le bloc Cartagena."},
+  {r:"andes", n:"Caño Cristales", art:"lake", img:"cano-cristales", ll:[2.2643,-73.7944],
+   note:"« La rivière aux cinq couleurs » (La Macarena) — spectaculaire de juin à novembre, donc vos dates conviennent.",
+   implies:"Accessible uniquement en avion depuis Bogotá — ce serait un 4ᵉ et 5ᵉ segment de vol en plus des 3 déjà prévus.",
+   recommend:"Remplacerait l'aller-retour Leticia plutôt que de s'y ajouter : même logique (une enclave sans route), même budget avion.",
+   swap:"À choisir à la place de l'Amazonie — sauf à retirer encore 3-4 nuits ailleurs sur la côte pour caser les deux."},
+];
+
+/* ---------- MAP ---------- */
+const map=L.map('map',{zoomControl:false,scrollWheelZoom:true,minZoom:3,worldCopyJump:false}).setView([6.5,-74.5],5);
+L.control.zoom({position:'bottomright'}).addTo(map);
+map.getContainer().style.background='#A9D6E5';
+map.createPane('basemap'); map.getPane('basemap').style.zIndex=200;
+
+/* ---------- BASEMAPS (real tiles) ----------
+   "relief" : Esri World Hillshade (real terrain shading — Andes, Sierra Nevada)
+              with CARTO Voyager multiplied on top, so the palette stays paper-soft.
+   "sat"    : Esri World Imagery + Voyager labels only.                            */
+const CARTO='https://{s}.basemaps.cartocdn.com/rastertiles/';
+const ESRI='https://server.arcgisonline.com/ArcGIS/rest/services/';
+function tl(url,opts){ return L.tileLayer(url,Object.assign({pane:'basemap',maxZoom:18,crossOrigin:true},opts)); }
+const BASEMAPS={
+  relief:[
+    tl(ESRI+'Elevation/World_Hillshade/MapServer/tile/{z}/{y}/{x}',{maxNativeZoom:16,className:'tl-relief'}),
+    tl(CARTO+'voyager_nolabels/{z}/{x}/{y}{r}.png',{maxNativeZoom:18,className:'tl-shade',opacity:.92}),
+    tl(CARTO+'voyager_only_labels/{z}/{x}/{y}{r}.png',{maxNativeZoom:18,opacity:.9}),
+  ],
+  sat:[
+    tl(ESRI+'World_Imagery/MapServer/tile/{z}/{y}/{x}',{maxNativeZoom:17}),
+    tl(CARTO+'voyager_only_labels/{z}/{x}/{y}{r}.png',{maxNativeZoom:18,opacity:.75}),
+  ],
+};
+const BASE_CREDIT={
+  relief:'Relief : Esri World Hillshade · Fond : CARTO / OpenStreetMap',
+  sat:'Imagerie : Esri, Maxar, Earthstar Geographics · Labels : CARTO',
+};
+let baseKey='relief';
+const creditEl=document.getElementById('map-credit');
+function setBasemap(key){
+  if(!BASEMAPS[key]) return;
+  Object.keys(BASEMAPS).forEach(k=>BASEMAPS[k].forEach(l=>{ if(k!==key&&map.hasLayer(l)){ try{map.removeLayer(l);}catch(e){} } }));
+  BASEMAPS[key].forEach(l=>{ if(!map.hasLayer(l)){ try{l.addTo(map);}catch(e){} } });
+  baseKey=key;
+  if(creditEl) creditEl.textContent=BASE_CREDIT[key];
+  document.body.dataset.base=key;
+}
+setBasemap('relief');
+
+/* thin outline so Colombia still reads as the subject, over real terrain */
+if(window.COL_GEO){
+  L.geoJSON(window.COL_GEO,{pane:'basemap',interactive:false,
+    style:{color:'#0E5C55',weight:1.6,opacity:.5,fill:false}}).addTo(map);
+}
+
+function makeIcon(color,label,type){
+  let cls='pin',inner='',style=`background:${color};`;
+  if(type==='sub'){cls='pin sub';}
+  else if(type==='later'){cls='pin later';style='';}
+  else{inner=`<b>${label}</b>`;}
+  return L.divIcon({className:'',html:`<div class="${cls}" style="${style}">${inner}</div>`,iconSize:[25,25],iconAnchor:[12,12]});
+}
+function popupHTML(s,region){
+  return `<div class="pp-img" style="background:${gradFor(region)}">${visualHTML(s,region,{scrim:false})}</div>
+    <div class="pp-body"><div class="pp-eyebrow">${s.dates||R[region].name}</div>
+    <div class="pp-title">${s.n}</div><div class="pp-note">${s.note}</div></div>`;
+}
+
+const mainMarkers=[], subMarkers={}, laterMarkers=[], subLines=[];
+let curFilter="all";
+/* A region filter should hide the legs that leave it, not just the panel cards. */
+function applyRouteFilter(){
+  const vis=el=>{ if(el) el.style.display=''; };
+  const hid=el=>{ if(el) el.style.display='none'; };
+  routeLines.forEach((l,i)=>{
+    const keep = curFilter==="all" || (STOPS[i].r===curFilter && STOPS[i+1].r===curFilter);
+    (keep?vis:hid)(l._path);
+  });
+  subLines.forEach(l=>{
+    const keep = curFilter==="all" || l._region===curFilter;
+    (keep?vis:hid)(l._path);
+  });
+}
+STOPS.forEach((s,i)=>{
+  const m=L.marker(s.ll,{icon:makeIcon(R[s.r].color,i+1,'main')}).addTo(map);
+  m.bindPopup(popupHTML(s,s.r),{closeButton:false,maxWidth:264});
+  m._region=s.r; mainMarkers.push(m);
+  (s.subs||[]).forEach(sub=>{
+    const sm=L.marker(sub.ll,{icon:makeIcon(R[s.r].color,'','sub')}).addTo(map);
+    sm.bindPopup(popupHTML(sub,s.r),{closeButton:false,maxWidth:264});
+    sm._region=s.r; subMarkers[sub.n]=sm;
+    const sl=L.polyline([s.ll,sub.ll],{color:R[s.r].color,weight:1.5,opacity:.4,dashArray:'1,6',interactive:false}).addTo(map);
+    sl._region=s.r; subLines.push(sl);
+  });
+});
+LATER.forEach(s=>{
+  const m=L.marker(s.ll,{icon:makeIcon('#8FA09A','','later')}).addTo(map);
+  m.bindPopup(popupHTML(s,s.r),{closeButton:false,maxWidth:264});
+  m._later=true; laterMarkers.push(m);
+});
+
+/* route legs, styled by arrival mode of the destination */
+const legStyle={
+  night:{color:'#15302C',weight:2.6,opacity:.75,dashArray:'10,8'},
+  day:{color:'#15302C',weight:2.4,opacity:.5},
+  boat:{color:'#1FA2D6',weight:2.6,opacity:.8,dashArray:'2,8'},
+  flight:{color:'#E0673B',weight:2.4,opacity:.8,dashArray:'1,7'},
+  /* dot-then-dash reads as "flight, then bus" without needing a second colour */
+  flightnight:{color:'#E0673B',weight:2.6,opacity:.85,dashArray:'1,6,9,6'},
+};
+let routeLines=[];
+/* on satellite the dark ink legs disappear into the imagery — swap them to white */
+function legFor(mode){
+  const st=Object.assign({},legStyle[mode]||legStyle.day);
+  if(baseKey==='sat'){
+    if(st.color==='#15302C'){ st.color='#FFFFFF'; st.opacity=.9; }
+    else { st.opacity=1; st.weight+=.4; }
+  }
+  return st;
+}
+/* Draw each leg as a line that traces itself, then settles into its real dash
+   pattern (bus / night bus / boat / flight). The dash pattern has to wait: the
+   draw is done *with* stroke-dasharray, so the two can't coexist. */
+const LEG_DRAW_MS=420;
+let drawTimers=[];
+function clearDrawTimers(){ drawTimers.forEach(clearTimeout); drawTimers=[]; }
+function settle(line,st){
+  const p=line._path; if(!p) return;
+  p.style.transition='';
+  p.style.strokeDasharray=st.dashArray||'';
+  p.style.strokeDashoffset='';
+}
+function traceLine(line,st,delay){
+  const p=(typeof line.getElement==='function' ? line.getElement() : null)||line._path;
+  if(!p||typeof p.getTotalLength!=='function'){ return; }
+  let len=0;
+  try{ len=p.getTotalLength(); }catch(e){}
+  if(!len){ settle(line,st); return; }
+  p.style.strokeDasharray=len+' '+len;
+  p.style.strokeDashoffset=len;
+  drawTimers.push(setTimeout(()=>{
+    p.style.transition=`stroke-dashoffset ${LEG_DRAW_MS}ms cubic-bezier(.4,0,.25,1)`;
+    p.style.strokeDashoffset='0';
+    drawTimers.push(setTimeout(()=>settle(line,st),LEG_DRAW_MS+40));
+  },delay));
+}
+function drawRoute(animate){
+  clearDrawTimers();
+  routeLines.forEach(l=>{ try{ map.removeLayer(l); }catch(e){} });
+  routeLines=[];
+  const reduce=window.matchMedia&&window.matchMedia('(prefers-reduced-motion:reduce)').matches;
+  for(let i=1;i<STOPS.length;i++){
+    const st=legFor(STOPS[i].arrive);
+    const line=L.polyline([STOPS[i-1].ll,STOPS[i].ll],st).addTo(map);
+    routeLines.push(line);
+    if(animate&&!reduce) traceLine(line,st,(i-1)*(LEG_DRAW_MS*0.62));
+  }
+  applyRouteFilter();
+}
+/* A pan/zoom rewrites the path geometry, which invalidates an in-flight
+   dash animation — snap the legs to their final state instead. */
+map.on('zoomstart movestart',()=>{
+  if(!drawTimers.length) return;
+  clearDrawTimers();
+  routeLines.forEach((l,i)=>settle(l,legFor(STOPS[i+1].arrive)));
+});
+drawRoute(true);
+let routeOn=true;
+document.getElementById('btn-route').onclick=safe(function(e){
+  routeOn=!routeOn;
+  const btn=e.currentTarget;
+  if(routeOn){drawRoute(true);btn.dataset.active="true";}
+  else{routeLines.forEach(l=>{ try{ map.removeLayer(l); }catch(err){} });routeLines=[];btn.dataset.active="false";}
+});
+
+const btnBase=document.getElementById('btn-base'), btnBaseTxt=document.getElementById('btn-base-txt');
+btnBase.onclick=safe(function(){
+  const next = baseKey==='relief' ? 'sat' : 'relief';
+  setBasemap(next);
+  btnBase.dataset.active = String(next==='sat');
+  btnBaseTxt.textContent = next==='sat' ? 'Relief' : 'Satellite';
+  if(routeOn) drawRoute();
+});
+
+function flyTo(ll,zoom){ try{ map.flyTo(ll,zoom||8,{duration:1.05}); }catch(e){ try{ map.setView(ll,zoom||8); }catch(e2){} } }
+function pulse(marker){ if(!marker) return; const el=marker._icon&&marker._icon.querySelector('.pin');
+  if(el){el.classList.add('pulse');setTimeout(()=>el.classList.remove('pulse'),900);} }
+function safePopup(marker){ if(marker && typeof marker.openPopup==='function'){ try{ marker.openPopup(); }catch(e){} } }
+
+/* ---------- RIBBON ---------- */
+const ribbon=document.getElementById('ribbon');
+STOPS.forEach((s,i)=>{
+  const wrap=document.createElement('div');wrap.className='rib';
+  const c=R[s.r].color;
+  wrap.innerHTML=`<div class="rib-stop">
+    <div class="rib-dot" style="background:${c}">${i+1}</div>
+    <div class="rib-name">${s.short}</div>
+    <div class="rib-date">${s.dates.replace('août','aoû')}</div></div>`;
+  wrap.querySelector('.rib-stop').onclick=safe(function(){ stopTour(); selectStop(i); });
+  ribbon.appendChild(wrap);
+  if(i<STOPS.length-1){
+    const mode=STOPS[i+1].arrive;
+    const link=document.createElement('div');link.className='rib-link';
+    const grad={night:'repeating-linear-gradient(90deg,var(--ink) 0 4px,transparent 4px 8px)',
+      boat:'repeating-linear-gradient(90deg,var(--iles) 0 2px,transparent 2px 6px)',
+      flight:'repeating-linear-gradient(90deg,var(--coral) 0 2px,transparent 2px 6px)',
+      flightnight:'repeating-linear-gradient(90deg,var(--coral) 0 2px,transparent 2px 5px,var(--coral) 5px 11px,transparent 11px 14px)',
+      day:'rgba(21,48,44,.4)'};
+    link.style.background=grad[mode]||grad.day;
+    ribbon.appendChild(link);
+  }
+});
+
+/* ---------- STOP CARDS ---------- */
+const stopsEl=document.getElementById('stops');
+const cardEls=[];
+
+function detailHTML(i){
+  const d=DETAILS[i]; if(!d) return '';
+  const bars=[1,2,3].map(n=>`<i class="${n<=d.budget.level?'on':''}"></i>`).join('');
+  return `<div class="card-detail">
+    <div class="cd"><b>Trajet</b><div class="v">${d.travel}</div><div class="s">${d.travelSub}</div></div>
+    <div class="cd"><b>Budget / nuit</b><div class="v">≈ ${d.budget.eur} € à deux</div>
+      <div class="bud">${bars}</div><div class="s">${d.budget.note}</div></div>
+    <div class="cd"><b>Météo · saison</b><div class="v">${d.weather.t}</div><div class="s">${d.weather.note}</div></div>
+  </div>${lodgeBarHTML(i)}`;
+}
+
+/* One button per place to sleep: the Cartagena étape has three, the others one. */
+function lodgeBarHTML(i){
+  const places=lodgingFor(i);
+  if(!places.length) return '';
+  return `<div class="lodge-bar">${places.map(p=>
+    `<button class="lodge-btn" data-stop="${i}" data-key="${p.key}">🛏 ${
+      places.length>1 ? p.name.replace(/^.*— /,'') : 'Logements'
+    } — 3 catégories</button>`).join('')}</div>`;
+}
+
+/* One stop selected at a time: expand its card, fly there, open its popup. */
+function selectStop(i,opts){
+  const o=opts||{}, s=STOPS[i];
+  cardEls.forEach((c,k)=>{ if(c) c.dataset.open=String(k===i); });
+  document.querySelectorAll('.rib-stop').forEach((el,k)=>{ el.dataset.cur=String(k===i); });
+  /* keyed by region, not index: Leticia sits far south of the rest of the
+     route and needs a wider view to keep its own geography in frame — a
+     magic index number would silently point at the wrong stop the next
+     time the itinerary gets reordered. */
+  flyTo(s.ll, o.zoom || (s.r==='amazon'?7:8));
+  setTimeout(()=>{ safePopup(mainMarkers[i]); },650);
+  pulse(mainMarkers[i]);
+  if(o.scroll!==false && cardEls[i]){
+    try{ cardEls[i].scrollIntoView({block:'center',behavior:'smooth'}); }catch(e){}
+  }
+}
+STOPS.forEach((s,i)=>{
+  const md=MODES[s.arrive];
+  const badge=`<span class="badge" style="background:${md.color}">${md.label}</span>`;
+  const card=document.createElement('div');card.className='card';card.dataset.region=s.r;
+  card.innerHTML=`
+    <div class="card-top">
+      <div class="card-img" style="background:${gradFor(s.r)}">
+        ${visualHTML(s,s.r,{scrim:true})}
+        <span class="card-num">${i+1}</span>
+      </div>
+      <div class="card-body">
+        <div class="card-meta"><span class="card-date">${s.dates} · ${s.nights} nuit${s.nights>1?'s':''}</span>${badge}</div>
+        <h3>${s.n}</h3><p>${s.note}</p>
+      </div>
+    </div>
+    ${detailHTML(i)}`;
+  card.onclick=safe(function(){ stopTour(); selectStop(i); });
+  stopsEl.appendChild(card);
+  cardEls[i]=card;
+  card.querySelectorAll('.lodge-btn').forEach(b=>{
+    b.onclick=safe(function(ev){
+      ev.stopPropagation();           // don't also re-select the stop behind it
+      stopTour();
+      lodgeReturnFocus=b;
+      openLodge(Number(b.dataset.stop), b.dataset.key);
+    });
+  });
+
+  if(s.tip){
+    const tip=document.createElement('div');tip.className='tip';tip.dataset.region=s.r;
+    tip.innerHTML=`<span>💡</span><span><b>Bon à savoir —</b> ${s.tip}</span>`;
+    stopsEl.appendChild(tip);
+  }
+  if(s.subs){
+    const row=document.createElement('div');row.className='subrow';row.dataset.region=s.r;
+    s.subs.forEach(sub=>{
+      const chip=document.createElement('div');chip.className='subchip';
+      /* a sub that carries its own nights is a real sleeping stop inside the
+         étape (the Cartagena block), not just a day trip — show the split */
+      const stay = sub.nights ? `<span class="sub-stay">${sub.nights} n</span>` : '';
+      chip.innerHTML=`<span class="subthumb" style="background:${gradFor(s.r)}">${visualHTML(sub,s.r)}</span>${sub.n}${stay}`;
+      chip.onclick=safe(function(ev){ ev.stopPropagation(); stopTour(); flyTo(sub.ll,10); setTimeout(()=>{ safePopup(subMarkers[sub.n]); },650); });
+      row.appendChild(chip);
+    });
+    stopsEl.appendChild(row);
+  }
+  if(i<STOPS.length-1){
+    const mode=STOPS[i+1].arrive;
+    const cls=LEG_CLASS[mode]||'day';
+    const txt=LEG_TXT[mode]||'bus';
+    const detail=STOPS[i+1].legDetail||'';
+    const leg=document.createElement('div');leg.className='leg';
+    leg.innerHTML=`<div class="l-line ${cls}"></div><span>↓ ${txt} vers ${STOPS[i+1].short}${detail?` <span class="leg-detail">— ${detail}</span>`:''}</span>`;
+    stopsEl.appendChild(leg);
+  }
+});
+
+/* ---------- LATER (what-if) ---------- */
+const laterEl=document.getElementById('later');
+laterEl.innerHTML=`<div class="later-head"><span class="later-name">Et si on ajoutait...</span><span class="later-bar"></span></div>
+  <p class="later-sub">Ce qui ne rentre pas dans ces 21 nuits sans tout redécouper — avec ce que ça impliquerait vraiment si vous vouliez l'ajouter.</p>`;
+LATER.forEach((s,k)=>{
+  const card=document.createElement('div');card.className='lcard';
+  card.innerHTML=`
+    <div class="lcard-head"><h4><span class="lthumb" style="background:${gradFor(s.r)}">${visualHTML(s,s.r)}</span>${s.n}</h4><span class="lcard-toggle">détails ▸</span></div>
+    <p>${s.note}</p>
+    <div class="grid2">
+      <div class="kv"><b>Ça implique</b>${s.implies}</div>
+      <div class="kv"><b>On mettrait ça où</b>${s.recommend}</div>
+    </div>
+    <div class="kv" style="margin-top:8px"><b>Par quoi remplacer</b>${s.swap}</div>`;
+  card.onclick=safe(function(){ flyTo(s.ll, s.r==='amazon'||s.r==='iles'?6:8); setTimeout(()=>{ safePopup(laterMarkers[k]); },650); });
+  laterEl.appendChild(card);
+});
+
+/* ---------- FILTERS ---------- */
+const filters=document.getElementById('filters');
+const allBtn=document.createElement('button');allBtn.className='chip';allBtn.dataset.active="true";allBtn.textContent="Tout";
+filters.appendChild(allBtn);
+const present=[...new Set(STOPS.map(s=>s.r))];
+const rbtns={};
+present.forEach(rk=>{
+  const b=document.createElement('button');b.className='chip';b.dataset.active="false";
+  b.innerHTML=`<span class="dot" style="background:${R[rk].color}"></span>${R[rk].name}`;
+  b.onclick=safe(function(){ stopTour(); setFilter(rk); });
+  rbtns[rk]=b;filters.appendChild(b);
+});
+allBtn.onclick=safe(function(){ stopTour(); setFilter("all"); });
+
+function show(m,v){ if(!m) return; if(m._icon) m._icon.style.display=v?"":"none"; if(m._shadow) m._shadow.style.display=v?"":"none"; }
+
+function setFilter(rk){
+  curFilter=rk;
+  applyRouteFilter();
+  allBtn.dataset.active=(rk==="all");
+  Object.entries(rbtns).forEach(([k,b])=>b.dataset.active=(k===rk));
+  mainMarkers.forEach(m=>show(m, rk==="all"||m._region===rk));
+  Object.values(subMarkers).forEach(m=>show(m, rk==="all"||m._region===rk));
+  laterMarkers.forEach(m=>show(m, rk==="all"));
+  document.querySelectorAll('.card,.subrow,.tip').forEach(el=>{
+    el.style.display=(rk==="all"||el.dataset.region===rk)?"":"none";
+  });
+  document.querySelectorAll('.leg').forEach(el=>{ el.style.display = rk==="all" ? "" : "none"; });
+  laterEl.style.display = rk==="all" ? "" : "none";
+
+  if(rk!=="all"){
+    const pts=[];
+    STOPS.filter(s=>s.r===rk).forEach(s=>{ pts.push(s.ll); (s.subs||[]).forEach(x=>pts.push(x.ll)); });
+    if(pts.length===1){ flyTo(pts[0],9); }
+    else if(pts.length>1){
+      try{
+        const b=L.latLngBounds(pts);
+        if(b.isValid()){ map.flyToBounds(b.pad(.5),{duration:1}); }
+      }catch(e){ flyTo(pts[0],8); }
+    }
+  } else {
+    fitAll(true);
+  }
+}
+function fitAll(animate){
+  try{
+    const b=L.latLngBounds(STOPS.map(s=>s.ll)).pad(.15);
+    animate ? map.flyToBounds(b,{duration:1}) : map.fitBounds(b,{animate:false});
+  }catch(e){ try{ map.setView([6.5,-74.5],5); }catch(e2){} }
+}
+
+/* ---------- LODGING MODAL ---------- */
+const lodgeEl=document.getElementById('lodge');
+const lodgeCols=document.getElementById('lodge-cols');
+const lodgeTabs=document.getElementById('lodge-tabs');
+let lodgeReturnFocus=null;
+
+const FR_MONTH=["janv.","févr.","mars","avril","mai","juin","juil.","août","sept.","oct.","nov.","déc."];
+function frDate(iso){ const [,m,d]=iso.split('-').map(Number); return `${d} ${FR_MONTH[m-1]}`; }
+
+function lodgingFor(stopIdx){ return LODGING.filter(p=>p.stop===stopIdx); }
+
+function renderLodge(place){
+  document.getElementById('lodge-eyebrow').textContent =
+    `${frDate(place.checkin)} → ${frDate(place.checkout)} · ${place.nights} nuit${place.nights>1?'s':''}`;
+  document.getElementById('lodge-title').textContent = place.name;
+  const hasPicks=CATS.some(c=>(place.cats[c.key]||{}).picks&&place.cats[c.key].picks.length);
+  document.getElementById('lodge-meta').textContent =
+    `2 voyageurs · lit double · aucun logement partagé · plafond 80 €/nuit`
+    + (hasPicks?` · prix relevés le ${CURATED_ON}`:``);
+  document.getElementById('lodge-areas').innerHTML = place.areas;
+  lodgeCols.innerHTML = CATS.map(c=>{
+    const cat=place.cats[c.key]||{guide:'',picks:[]};
+    const picks=cat.picks||[];
+    const pickHTML = picks.length ? `<div class="lpicks">${picks.map(p=>`
+      <a class="lpick" href="${pickURL(place,p)}" target="_blank" rel="noopener noreferrer">
+        <div class="lpick-top"><span class="lpick-nom">${p.nom}</span><span class="lpick-eur">${p.eur} €<span class="lpick-nuit">/nuit</span></span></div>
+        <div class="lpick-meta">${p.zone} · ${p.note}${p.avis?`/${p.airbnb?'5':'10'} (${p.avis} avis)`:''} · ${p.airbnb?'Airbnb':'Booking'}${p.total?` · ${p.total} € au total`:''}</div>
+        <div class="lpick-extra">${p.extra}</div>
+      </a>`).join('')}</div>` : '';
+    const fallback = picks.length
+      ? `<div class="lcat-links compact">
+           <a href="${airbnbURL(place,c)}" target="_blank" rel="noopener noreferrer"><span>Tous les résultats Airbnb</span><span>↗</span></a>
+           <a href="${bookingURL(place,c)}" target="_blank" rel="noopener noreferrer"><span>Tous les résultats Booking</span><span>↗</span></a>
+         </div>`
+      : `<div class="lcat-links">
+           <a href="${airbnbURL(place,c)}" target="_blank" rel="noopener noreferrer"><span>Airbnb</span><span>↗</span></a>
+           <a href="${bookingURL(place,c)}" target="_blank" rel="noopener noreferrer"><span>Booking</span><span>↗</span></a>
+         </div>
+         <div class="lcat-note"><b>À régler sur le site :</b> prix max <b>${c.max} €</b>${c.min?` (min ${c.min} €)`:''} par nuit,
+         ${c.rooms.includes("Private room")
+           ? 'et type « logement entier » <b>ou</b> « chambre privée » — jamais « chambre partagée »'
+           : 'et type « logement entier » uniquement'}.</div>`;
+    return `<div class="lcat">
+      <div class="lcat-h"><span class="lcat-dot" style="background:${c.color}"></span>${c.label}</div>
+      <div class="lcat-band">${c.band}${picks.length?` · ${picks.length} pistes vérifiées`:' · à explorer'}</div>
+      <div class="lcat-guide">${cat.guide}</div>
+      ${pickHTML}${fallback}
+    </div>`;}).join('');
+  const note=document.getElementById('lodge-note');
+  note.innerHTML = place.note ? `<div style="color:var(--ink);margin-bottom:10px">${place.note}</div>` : '';
+}
+
+function openLodge(stopIdx,placeKey){
+  const places=lodgingFor(stopIdx);
+  if(!places.length) return;
+  const place=places.find(p=>p.key===placeKey)||places[0];
+  lodgeTabs.innerHTML = places.length>1 ? places.map(p=>
+    `<button class="lodge-tab" data-key="${p.key}" data-on="${p===place}">${p.name.replace(/^.*— /,'')} · ${p.nights} n</button>`).join('') : '';
+  lodgeTabs.querySelectorAll('.lodge-tab').forEach(b=>{
+    b.onclick=safe(function(){ openLodge(stopIdx,b.dataset.key); });
+  });
+  renderLodge(place);
+  lodgeEl.hidden=false;
+  document.getElementById('lodge-x').focus();
+}
+function closeLodge(){
+  lodgeEl.hidden=true;
+  if(lodgeReturnFocus && lodgeReturnFocus.focus) lodgeReturnFocus.focus();
+  lodgeReturnFocus=null;
+}
+document.getElementById('lodge-x').onclick=safe(closeLodge);
+lodgeEl.onclick=safe(function(ev){ if(ev.target===lodgeEl) closeLodge(); });
+
+/* ---------- PRESENTATION MODE ----------
+   Flies the itinerary stop by stop, hands-free. Every wait is registered so a
+   stop (button, Escape, or any manual click) cancels cleanly; the token guards
+   against a stale loop resuming after it was cancelled. */
+const TOUR_DELAYS=[4000,7000,10000];
+let tourDelayIdx=1, tourToken=0, tourRunning=false, tourTimers=[];
+const btnTour=document.getElementById('btn-tour');
+const btnTourTxt=document.getElementById('btn-tour-txt');
+const btnDelay=document.getElementById('btn-delay');
+
+function tourWait(ms,token){
+  return new Promise(res=>{
+    const id=setTimeout(()=>{
+      tourTimers=tourTimers.filter(x=>x!==id);
+      res(token===tourToken);
+    },ms);
+    tourTimers.push(id);
+  });
+}
+function stopTour(){
+  if(!tourRunning && !tourTimers.length) return;
+  tourToken++; tourRunning=false;
+  tourTimers.forEach(clearTimeout); tourTimers=[];
+  btnTour.dataset.active="false"; btnTourTxt.textContent="▶ Présentation";
+}
+async function runTour(){
+  stopTour();
+  tourRunning=true;
+  const token=++tourToken;
+  btnTour.dataset.active="true"; btnTourTxt.textContent="■ Arrêter";
+  if(curFilter!=="all") setFilter("all");
+  for(let i=0;i<STOPS.length;i++){
+    if(token!==tourToken) return;
+    selectStop(i);
+    if(!await tourWait(TOUR_DELAYS[tourDelayIdx],token)) return;
+  }
+  if(token!==tourToken) return;
+  stopTour();
+  cardEls.forEach(c=>{ if(c) c.dataset.open="false"; });
+  document.querySelectorAll('.rib-stop').forEach(el=>{ el.dataset.cur="false"; });
+  fitAll();
+}
+btnTour.onclick=safe(function(){ tourRunning ? stopTour() : runTour(); });
+btnDelay.onclick=safe(function(){
+  tourDelayIdx=(tourDelayIdx+1)%TOUR_DELAYS.length;
+  btnDelay.textContent=(TOUR_DELAYS[tourDelayIdx]/1000)+' s';
+});
+document.addEventListener('keydown',function(e){
+  if(e.key==='Escape'){
+    if(!lodgeEl.hidden){ closeLodge(); return; }   // modal first, then the tour
+    stopTour();
+  }
+  /* Space must not start a tour behind an open modal */
+  else if(e.key===' '&&e.target===document.body&&lodgeEl.hidden){ e.preventDefault(); tourRunning?stopTour():runTour(); }
+});
+
+/* ---------- PHOTO CREDITS ---------- */
+(function(){
+  const el=document.getElementById('credit-list'); if(!el) return;
+  const label={};
+  STOPS.forEach(s=>{ label[s.img]=s.n; (s.subs||[]).forEach(x=>label[x.img]=x.n); });
+  LATER.forEach(s=>{ label[s.img]=s.n; });
+  el.innerHTML=Object.entries(PHOTO_CREDITS).map(([slug,c])=>
+    `<div><a href="${c[2]}" target="_blank" rel="noopener noreferrer">${esc(label[slug]||slug)}</a> — ${esc(c[0])}, ${esc(c[1])}</div>`
+  ).join('');
+})();
+
+setTimeout(()=>fitAll(false),300);
+</script>
+</body>
+</html>

@@ -1,0 +1,135 @@
+{
+  "bogota": {
+    "title": "File:La Candelaria, Bogota, Colombia (5818105341).jpg",
+    "author": "Pedro Szekely from Los Angeles, USA",
+    "license": "CC BY-SA 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0",
+    "source": "https://commons.wikimedia.org/wiki/File:La_Candelaria%2C_Bogota%2C_Colombia_(5818105341).jpg"
+  },
+  "bogota-depart": {
+    "title": "File:2019 Bogotá - Iglesia de Monserrate.jpg",
+    "author": "Felipe Restrepo Acosta",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:2019_Bogot%C3%A1_-_Iglesia_de_Monserrate.jpg"
+  },
+  "salento": {
+    "title": "File:Calle 5, Salento 03.jpg",
+    "author": "Bernard Gagnon",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Calle_5%2C_Salento_03.jpg"
+  },
+  "cocora": {
+    "title": "File:Paisaje Valle del Cocora.jpg",
+    "author": "Estebanhphoto",
+    "license": "CC BY 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Paisaje_Valle_del_Cocora.jpg"
+  },
+  "medellin": {
+    "title": "File:Medellín Panorámica.jpg",
+    "author": "Carlos Andres Granada",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Medell%C3%ADn_Panor%C3%A1mica.jpg"
+  },
+  "guatape": {
+    "title": "File:Piedra y Embalse del Peñol desde dron 05.jpg",
+    "author": "Juan Gómez",
+    "license": "CC BY 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/2.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Piedra_y_Embalse_del_Pe%C3%B1ol_desde_dron_05.jpg"
+  },
+  "leticia": {
+    "title": "File:Atardecer en el Río amamazonas Leticia,Colombia.jpg",
+    "author": "Josefordonez",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Atardecer_en_el_R%C3%ADo_amamazonas_Leticia%2CColombia.jpg"
+  },
+  "puerto-narino": {
+    "title": "File:Puerto Nariño Departamento del Amazonas.jpg",
+    "author": "Gatocalvo",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Puerto_Nari%C3%B1o_Departamento_del_Amazonas.jpg"
+  },
+  "cartagena": {
+    "title": "File:Calles Coloniales en Cartagena.JPG",
+    "author": "Juanfernandovilla",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Calles_Coloniales_en_Cartagena.JPG"
+  },
+  "san-bernardo": {
+    "title": "File:Isla Múcura - playa - Colombia.jpg",
+    "author": "XibalbaWikiCommons",
+    "license": "CC BY-SA 3.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Isla_M%C3%BAcura_-_playa_-_Colombia.jpg"
+  },
+  "santa-marta": {
+    "title": "File:Bahía de Santa Marta.jpg",
+    "author": "CristhianVarela",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Bah%C3%ADa_de_Santa_Marta.jpg"
+  },
+  "minca": {
+    "title": "File:Santa Marta cascadas.jpg",
+    "author": "Giancarlos1234",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Santa_Marta_cascadas.jpg"
+  },
+  "tayrona": {
+    "title": "File:El Cabo at Tayrona National Park.JPG",
+    "author": "Uhkabu",
+    "license": "CC BY-SA 3.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+    "source": "https://commons.wikimedia.org/wiki/File:El_Cabo_at_Tayrona_National_Park.JPG"
+  },
+  "taganga": {
+    "title": "File:Taganga, Santa Marta, Colombia.jpg",
+    "author": "Henrr Pomares",
+    "license": "CC0",
+    "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+    "source": "https://commons.wikimedia.org/wiki/File:Taganga%2C_Santa_Marta%2C_Colombia.jpg"
+  },
+  "san-andres": {
+    "title": "File:Johny Cay.jpg",
+    "author": "Mario Carvajal",
+    "license": "CC BY 3.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/3.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Johny_Cay.jpg"
+  },
+  "capurgana": {
+    "title": "File:Bahía de Sapzurro y claridad marina.jpg",
+    "author": "Johan Andrés Toro",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Bah%C3%ADa_de_Sapzurro_y_claridad_marina.jpg"
+  },
+  "tatacoa": {
+    "title": "File:Desierto de La Tatacoa (Tatacoa Desert).jpg",
+    "author": "SergiXCX",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Desierto_de_La_Tatacoa_(Tatacoa_Desert).jpg"
+  },
+  "cano-cristales": {
+    "title": "File:Caño cristales (La Macarena).jpg",
+    "author": "Ricardo Gonzalez Arango",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Ca%C3%B1o_cristales_(La_Macarena).jpg"
+  },
+  "islas-rosario": {
+    "title": "File:Playa Blanca - Islas del Rosario (4625668665).jpg",
+    "author": "Jorge Láscar",
+    "license": "CC BY 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/2.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Playa_Blanca_-_Islas_del_Rosario_(4625668665).jpg"
+  }
+}

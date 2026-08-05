@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "colombia-map",
+      "runtimeExecutable": "node",
+      "runtimeArgs": ["/Users/lgoncalves/Desktop/colombia-trip/serve.mjs"],
+      "port": 8777
+    }
+  ]
+}
