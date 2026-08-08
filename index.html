@@ -20,7 +20,11 @@
   *{box-sizing:border-box;margin:0;padding:0}
   html,body{background:var(--paper);color:var(--ink);font-family:"Instrument Sans",system-ui,sans-serif;-webkit-font-smoothing:antialiased}
   body{display:grid;grid-template-columns:minmax(0,1fr) 490px;height:100vh;overflow:hidden}
-  @media (max-width:900px){ body{grid-template-columns:1fr;height:auto;overflow:auto} }
+  /* minmax(0,...), not a bare 1fr: without the explicit 0 floor, a CSS grid
+     track won't shrink below the max-content width of its contents, so any
+     unbreakable string anywhere in the panel (a long badge, a nowrap date)
+     silently forces the whole page wider than the phone viewport. */
+  @media (max-width:900px){ body{grid-template-columns:minmax(0,1fr);height:auto;overflow:auto} }
 
   #map{width:100%;height:100vh;background:#A9D6E5;position:sticky;top:0}
   @media (max-width:900px){ #map{height:50vh;position:sticky;top:0;z-index:5} }
