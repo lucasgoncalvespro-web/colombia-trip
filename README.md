@@ -6,8 +6,8 @@ Construite d'abord dans Claude.ai (artefact web), reprise ici dans un vrai envir
 
 ## Contraintes du voyage (à respecter si l'itinéraire est modifié)
 - Dates fixes : arrivée Bogotá le 15/08 à 19h25, départ Bogotá le 05/09 à 21h35 (21 nuits).
-- **3 vols au total** : aller-retour Bogotá ↔ Leticia (Amazonie, injoignable par la route)
-  + Santa Marta → Bogotá au retour, pour éviter un bus de 17h le dernier jour.
+- **2 trajets en avion** : Santa Marta → Leticia (via Bogotá) le 1ᵉʳ sept., puis
+  Leticia → Bogotá le 4. L'Amazonie n'est reliée à rien par la route.
 - Bus de nuit acceptés, max 3-4 sur tout le trajet (actuellement 2).
 - Rythme : 1 à 4 nuits par **lieu de couchage**, jamais plus. Le bloc « Cartagena &
   les îles » compte 6 nuits mais réparties sur 2-3 lieux distincts, donc la règle tient.
@@ -17,32 +17,45 @@ Construite d'abord dans Claude.ai (artefact web), reprise ici dans un vrai envir
 ## Étapes actuelles (dans l'ordre)
 | # | Étape | Dates | Nuits | Arrivée par |
 |---|---|---|---|---|
-| 1 | Bogotá (arrivée) | 15 août | 1 | vol international, 19h25 |
-| 2 | Leticia & Amazonie | 16-19 août | 3 | vol direct Bogotá→Leticia (~2h) |
-| 3 | Salento & Cocora | 20-21 août | 1 | vol retour le 19 + bus de nuit Bogotá→Salento |
-| 4 | Medellín | 21-24 août | 3 | bus de jour Salento→Medellín (~6h) |
-| 5 | Guatapé & le Peñón | 24-25 août | 1 | bus court Medellín→Guatapé (~1h30) |
-| 6 | Cartagena & les îles | 26 août-1 sept. | 6 | bus de nuit Medellín→Cartagena (~12-14h) |
-| ↳ | Cartagena — ville murée | 26-27 août | 2 | — |
-| ↳ | Islas del Rosario | 28-29 août | 2 | lancha ~1h depuis Cartagena |
-| ↳ | Îles de San Bernardo | 30-31 août | 2 | bateau ~1h30 depuis Rosario |
-| 7 | Santa Marta & la Sierra | 1-4 sept. | 3 | bus de jour Cartagena→Santa Marta (~4-5h) |
-| 8 | Bogotá (départ) | 4-5 sept. | 1 | **vol** direct Santa Marta→Bogotá (~1h30) |
+| 1 | Bogotá (arrivée) | 15-16 août | 1 | vol international, 19h25 |
+| — | *bus de nuit Bogotá→Salento* | *nuit du 16* | *(bus)* | — |
+| 2 | Salento & Cocora | 17-18 août | 1 | bus de nuit via Armenia + minibus |
+| 3 | Medellín | 18-21 août | 3 | bus de jour Salento→Medellín (~6h) |
+| 4 | Guatapé & le Peñón | 21-22 août | 1 | bus court Medellín→Guatapé (~1h30) |
+| — | *bus de nuit Medellín→Cartagena* | *nuit du 22* | *(bus)* | — |
+| 5 | Cartagena & les îles | 23-29 août | 6 | bus de nuit (~12-14h) |
+| ↳ | Cartagena — ville murée | 23-24 août | 2 | — |
+| ↳ | Islas del Rosario | 25-26 août | 2 | lancha ~1h depuis Cartagena |
+| ↳ | Îles de San Bernardo | 27-28 août | 2 | bateau ~1h30 depuis Rosario |
+| 6 | Santa Marta & la Sierra | 29 août-1 sept. | 3 | bus de jour Cartagena→Santa Marta |
+| 7 | **Leticia & l'Amazonie** | 1-4 sept. | 3 | **vol** Santa Marta→Leticia, 12h→17h |
+| ↳ | Leticia — ville | 1-2 sept. | 1 | — |
+| ↳ | Lodge en jungle (Puerto Nariño) | 2-4 sept. | 2 | ~2h de bateau depuis Leticia |
+| 8 | Bogotá (départ) | 4-5 sept. | 1 | **vol** Leticia→Bogotá (~2h) |
 
 **Bilan** : 19 nuits en lit + 2 nuits passées dans un bus de nuit = 21 nuits.
-3 segments de vol, 2 bus de nuit.
+**2 trajets en avion** (Santa Marta→Leticia avec correspondance à Bogotá, puis Leticia→Bogotá), 2 bus de nuit.
 
-### Le mode de transport composite `flightnight`
-L'arrivée à Salento (étape 3) est un transfert unique qui enchaîne **deux modes** :
-vol Leticia→Bogotá en journée, puis bus de nuit Bogotá→Salento. Le réduire à `flight`
-ou à `night` fausserait le décompte affiché. D'où un mode dédié `flightnight`, déclaré
-dans `MODES` / `LEG_TXT` / `LEG_CLASS` / `legStyle`, plus la carte de dégradés du ruban,
-la CSS `.leg .l-line.flightnight` et `.lm.flightnight` de la légende. **Si tu ajoutes un
-mode, ces 7 endroits doivent être mis à jour ensemble** — sinon le tracé retombe
-silencieusement sur le style `day`.
+### Réagencement d'août 2026 : l'Amazonie déplacée en finale
+L'Amazonie était en début de voyage (aller-retour Bogotá↔Leticia). Elle est passée
+**en fin de parcours** : vol Santa Marta→Leticia le 1ᵉʳ septembre (12h→17h, avec
+correspondance à Bogotá), puis retour Leticia→Bogotá le 4. Tout le reste s'est
+**avancé de 3 jours**.
+
+Conséquences dans le code :
+- Le mode composite `flightnight` (vol + bus de nuit enchaînés) **n'a plus aucun
+  trajet qui l'utilise** et a été retiré de ses 8 emplacements (`MODES`, `LEG_TXT`,
+  `LEG_CLASS`, `legStyle`, la carte de dégradés du ruban, les deux règles CSS et la
+  légende du pied de page). Si un futur trajet recombine deux modes, il faudra le
+  recréer — mais du code mort documenté comme actif est pire que pas de code.
+- Le zoom élargi de l'Amazonie suit automatiquement l'étape parce qu'il est indexé
+  sur la **région** (`s.r === 'amazon'`) et non sur un numéro d'étape. C'est
+  exactement le piège qui avait été corrigé lors du réagencement précédent.
+- L'étape Amazonie a maintenant **deux lieux de couchage** datés (Leticia ville 1 nuit,
+  lodge en jungle 2 nuits), sur le même modèle que le bloc Cartagena.
 
 ### Le bloc Cartagena : une étape, trois lieux de couchage
-L'étape 6 est **une seule entrée de `STOPS`** (sinon la carte afficherait 10 étapes au
+L'étape 5 est **une seule entrée de `STOPS`** (sinon la carte afficherait 10 étapes au
 lieu de 8), mais ses `subs` portent chacune `dates` + `nights` : ce sont de vrais lieux
 où l'on dort, pas des excursions à la journée. Le rendu s'adapte tout seul :
 - une `sub` avec `nights` affiche un badge « 2 n » dans sa puce (`.sub-stay`) ;
@@ -53,11 +66,11 @@ vérifié en test, pas garanti par le code.
 
 **Progression géographique** : Cartagena → Rosario → San Bernardo descend vers le sud,
 donc chaque saut est court (~1h, puis ~1h30). Le prix à payer est la remontée du
-1ᵉʳ septembre : lancha directe San Bernardo→Cartagena (~2h) + bus →Santa Marta (~4-5h).
+29 août : lancha directe San Bernardo→Cartagena (~2h) + bus →Santa Marta (~4-5h).
 Inverser Rosario et San Bernardo rendrait ce dernier jour plus léger, au prix de deux
 sauts plus longs au milieu.
 
-### Logements (`LODGING`) — 10 lieux, 81 hébergements réels
+### Logements (`LODGING`) — 11 lieux, 92 hébergements réels
 Un panneau modal par **lieu de couchage** (bouton « 🛏 Logements » dans la fiche
 dépliée), avec trois catégories : abordable / haut du budget / original. Les données
 ont été relevées **sur les pages de résultats Airbnb et Booking en direct**, aux dates
@@ -75,14 +88,21 @@ critères manuels sont affichés dans le modal pour les catégories sans sélect
 Airbnb veut `", "` écrit `--` dans son segment d'URL (`airbnbSlug`), sinon il affiche
 un `%2C` littéral dans sa propre interface.
 
-**Trois étapes n'ont pas 9 propositions, volontairement** — la consigne était de le dire
+**Trois lieux n'ont pas 9 propositions, volontairement** — la consigne était de le dire
 plutôt que de compléter avec du médiocre :
-- **Medellín (8)** : la ville n'a pas de logement atypique dans ce budget, l'offre est
-  massivement composée d'appartements modernes.
-- **Islas del Rosario (5)** : 12 annonces Airbnb sur 18 et 23 résultats Booking sur 25
-  dépassent le plafond de 80 €. Une seule option sous 45 €. L'étape la plus contrainte.
-- **Îles de San Bernardo (6)** : un seul hébergement réellement *sur* les îles tient
-  sous 80 € (Tintipán). Le reste est à Rincón del Mar, sur le continent.
+- **Islas del Rosario (5)** : 11 annonces Airbnb sur 18 dépassent encore le plafond de
+  80 €. Une seule option sous 45 €. Reste l'étape la plus contrainte du séjour.
+- **Îles de San Bernardo (7)** : **plus aucun hébergement sur les îles elles-mêmes**
+  sous 80 € aux dates du 27-29 août — la chambre de Tintipán, seule option insulaire de
+  la recherche précédente, a disparu. Tout le reste est à Rincón del Mar, sur le continent.
+- **Bogotá départ (8)** : le plafond réel d'Airbnb à Bogotá est ~67 €, la catégorie
+  « original » n'a que deux entrées qui tiennent vraiment la route.
+
+**Après le réagencement, les prix et disponibilités ont été intégralement re-relevés.**
+Beaucoup de pistes de la recherche précédente ont disparu (6 sur 9 à Salento, 7 sur 8 à
+Medellín, 7 sur 9 à Cartagena), et d'autres sont apparues — dont une **maison en terre**
+à Sabaneta pour Medellín (qui n'avait rien d'atypique auparavant) et une **tiny house**
+à Salento à 295 avis. Les deux étapes amazoniennes sont entièrement nouvelles.
 
 ### Guatapé : sous-lieu → étape
 Guatapé était un `sub` de Medellín (excursion à la journée). C'est maintenant une étape
@@ -95,9 +115,12 @@ sous-lieu du tout, ce qui est normal.
 2. **1ʳᵉ refonte** : Leticia déplacée juste après l'arrivée, en aller-retour direct
    depuis Bogotá (2 segments, sans correspondance). La distance Antioquia→Caraïbe,
    auparavant portée par le vol, devient un bus de nuit Medellín→Cartagena.
-3. **Refonte actuelle** : Guatapé promu en étape, bloc Cartagena étendu à 6 nuits sur
+3. **2ᵉ refonte** : Guatapé promu en étape, bloc Cartagena étendu à 6 nuits sur
    plusieurs lieux, et le bus de nuit final Santa Marta→Bogotá remplacé par un vol
    (~1h30 au lieu de ~17h) pour ne pas sacrifier la dernière journée. D'où 3 vols.
+4. **Refonte actuelle** : l'Amazonie passe en finale (1-4 sept., vol Santa Marta→Leticia
+   puis Leticia→Bogotá), tout le reste avancé de 3 jours. Le compteur retombe à
+   **2 trajets en avion**, et le mode `flightnight` devient inutile — voir plus haut.
 
 ## Lancer en local
 Les tuiles de carte et `/images` ne se chargent pas en `file://` — il faut un serveur.

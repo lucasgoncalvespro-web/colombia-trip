@@ -131,7 +131,6 @@
   .leg .l-line.day{background:var(--ink);opacity:.5}
   .leg .l-line.boat{background:repeating-linear-gradient(180deg,var(--iles) 0 2px,transparent 2px 8px)}
   .leg .l-line.flight{background:repeating-linear-gradient(180deg,var(--coral) 0 3px,transparent 3px 7px)}
-  .leg .l-line.flightnight{height:34px;background:repeating-linear-gradient(180deg,var(--coral) 0 2px,transparent 2px 5px,var(--coral) 5px 12px,transparent 12px 15px)}
   .leg-detail{color:var(--ink-soft);opacity:.8;font-size:10px}
 
   .later{padding:6px 22px 8px}
@@ -169,8 +168,6 @@
   .lm.night{border-top-style:dashed;opacity:1}
   .lm.boat{border-top-style:dotted;border-color:var(--iles);border-top-width:2.5px}
   .lm.flight{border-top-style:dotted;border-color:var(--coral);border-top-width:2.5px}
-  .lm.flightnight{border:none;height:2.5px;width:26px;
-    background:repeating-linear-gradient(90deg,var(--coral) 0 2px,transparent 2px 5px,var(--coral) 5px 11px,transparent 11px 14px)}
 
   /* ---- expanding detail strip under a selected stop ---- */
   .card-detail{display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid transparent;
@@ -297,13 +294,13 @@
 
 <aside id="panel">
   <div class="hero">
-    <div class="kicker">Itinéraire · à deux · 3 vols, 2 bus de nuit</div>
+    <div class="kicker">Itinéraire · à deux · 2 vols, 2 bus de nuit</div>
     <h1>Colombie<br><em>15 août → 5 sept.</em></h1>
-    <p>Bogotá → <b>Amazonie</b> (aller-retour avion) → café → Medellín &amp; Guatapé → Caraïbes → retour Bogotá en avion. Deux longs bus de nuit portent les grandes distances terrestres ; l'avion ne sert qu'à Leticia, injoignable par la route, et au retour final depuis Santa Marta.</p>
+    <p>Bogotá → café → Medellín &amp; Guatapé → Caraïbes → <b>Amazonie</b> pour finir. Deux longs bus de nuit portent les grandes distances terrestres ; l'avion ne sert qu'à rejoindre Leticia depuis la côte, puis à rentrer — l'Amazonie n'étant reliée à rien par la route.</p>
     <div class="stats">
       <div class="stat"><b>21</b><span>nuits</span></div>
       <div class="stat"><b>8</b><span>étapes</span></div>
-      <div class="stat"><b>3</b><span>vols</span></div>
+      <div class="stat"><b>2</b><span>vols</span></div>
       <div class="stat"><b>2</b><span>bus de nuit</span></div>
     </div>
   </div>
@@ -318,7 +315,6 @@
       <span><span class="lm night"></span>bus de nuit</span>
       <span><span class="lm boat"></span>bus + bateau</span>
       <span><span class="lm flight"></span>vol</span>
-      <span><span class="lm flightnight"></span>vol + bus de nuit</span>
     </div>
     Clique une étape (carte, ruban ou fiche) pour voler jusqu'à elle et déplier son détail. Le bouton <b>Présentation</b> enchaîne les 8 étapes tout seul — le chip à côté règle le délai (4 / 7 / 10 s), <b>Échap</b> ou <b>Espace</b> arrête.<br><br>
     Durées de trajet indicatives (trafic, saison) — à reconfirmer en réservant. Budgets&nbsp;: estimation pour une chambre double milieu de gamme, par nuit, hors repas et activités. Météo&nbsp;: moyennes saisonnières de fin août, pas une prévision.<br><br>
@@ -420,13 +416,9 @@ const MODES={
   night:{label:"🚌 bus nuit",color:"#15302C"},
   boat:{label:"⛴ bus + bateau",color:"#1FA2D6"},
   flight:{label:"✈ vol",color:"#E0673B"},
-  /* composite: a flight that lands back at a hub, then a night bus onward.
-     Needed for Leticia→Bogotá→Salento, which is one continuous transfer but
-     two modes — collapsing it to either one would misreport the trip. */
-  flightnight:{label:"✈ vol + bus nuit",color:"#E0673B"},
 };
-const LEG_TXT={day:"bus de jour",night:"bus de nuit",boat:"bus + bateau",flight:"vol",flightnight:"vol + bus de nuit"};
-const LEG_CLASS={day:"day",night:"night",boat:"boat",flight:"flight",flightnight:"flightnight"};
+const LEG_TXT={day:"bus de jour",night:"bus de nuit",boat:"bus + bateau",flight:"vol"};
+const LEG_CLASS={day:"day",night:"night",boat:"boat",flight:"flight"};
 
 /* ---------- ITINERARY (main stops, in order) ----------
    Reordered 2026-07: Leticia moved right after the Bogotá arrival, as a direct
@@ -438,51 +430,57 @@ const LEG_CLASS={day:"day",night:"night",boat:"boat",flight:"flight",flightnight
    final Bogotá stay drops from 3 to 2 nights (still 21 nights total: the
    night bus adds a travel-only night that has to come from somewhere). */
 const STOPS=[
-  {r:"andes", n:"Bogotá — arrivée", short:"Bogotá", art:"andes", img:"bogota", dates:"15 août", nights:1, arrive:"start", legDetail:"", ll:[4.7110,-74.0721],
-   note:"Arrivée le 15 à 19h25. Une nuit sur place pour souffler et s'acclimater à 2 600 m — La Candelaria et le Musée de l'Or attendront le retour.",
-   tip:"Une seule nuit ici à l'aller : garde La Candelaria, Monserrate et Zipaquirá pour l'étape retour du 4 septembre, où vous repasserez par Bogotá."},
+  {r:"andes", n:"Bogotá — arrivée", short:"Bogotá", art:"andes", img:"bogota", dates:"15–16 août", nights:1, arrive:"start", legDetail:"", ll:[4.7110,-74.0721],
+   note:"Arrivée le 15 à 19h25. Une nuit pour souffler et s'acclimater à 2 600 m, puis toute la journée du 16 libre avant le bus du soir — de quoi faire La Candelaria et le Musée de l'Or dès l'aller.",
+   tip:"Vous gardez vos bagages la journée du 16 : demande à l'hébergement de les stocker après le check-out, le bus pour Salento ne part qu'en soirée."},
 
-  {r:"amazon", n:"Leticia & l'Amazonie", short:"Leticia", art:"amazon", img:"leticia", dates:"16–19 août", nights:3, arrive:"flight", legDetail:"vol direct Bogotá→Leticia, ~2h (aucune correspondance)", ll:[-4.2032,-69.9359],
-   note:"La grande exception avion du voyage : Leticia n'est reliée à rien par la route. Triple-frontière Colombie/Brésil/Pérou, fleuve Amazone, dauphins roses, réserve d'Amacayacu.",
-   tip:"Prends le vol retour du 19 le plus tôt possible : c'est lui qui conditionne toute la journée, puisqu'il enchaîne le soir même sur le bus de nuit vers Salento.",
-   subs:[{n:"Puerto Nariño & lac Tarapoto", art:"amazon", img:"puerto-narino", ll:[-3.7889,-70.3556], note:"Excursion bateau d'une demi-journée à une journée : village sans voitures, dauphins roses, parc Amacayacu."}]},
-
-  {r:"cafe", n:"Salento & Cocora", short:"Salento", art:"cafe", img:"salento", dates:"20–21 août", nights:1, arrive:"flightnight", legDetail:"vol Leticia→Bogotá le 19 en journée, puis bus de nuit Bogotá→Salento (nuit du 19 au 20)", ll:[4.6374,-75.5703],
+  {r:"cafe", n:"Salento & Cocora", short:"Salento", art:"cafe", img:"salento", dates:"17–18 août", nights:1, arrive:"night", legDetail:"bus de nuit Bogotá→Salento (nuit du 16 au 17), via Armenia + minibus ~45 min", ll:[4.6374,-75.5703],
    note:"Escale express dans la zone café : les palmiers à cire géants de Cocora, les fincas, le pueblo coloré. Une seule nuit, c'est le passage le plus serré du séjour.",
-   tip:"Avec une seule nuit, il faut choisir : Cocora le 20 au matin (départ tôt en Willys), déjeuner à Salento, et le bus pour Medellín le 21 au matin. Une finca de café en plus ne rentre pas.",
+   tip:"Avec une seule nuit, il faut choisir : Cocora le 17 au matin (départ tôt en Willys), déjeuner à Salento, et le bus pour Medellín le 18 au matin. Une finca de café en plus ne rentre pas.",
    subs:[{n:"Vallée de Cocora", art:"cafe", img:"cocora", ll:[4.6377,-75.4891], note:"Les palmiers à cire de 60 m, arbre national. Boucle de rando depuis Salento, jeeps Willys sur la place."}]},
 
-  {r:"antioquia", n:"Medellín", short:"Medellín", art:"antioquia", img:"medellin", dates:"21–24 août", nights:3, arrive:"day", legDetail:"bus de jour Salento/Armenia→Medellín ~6h", ll:[6.2476,-75.5658],
+  {r:"antioquia", n:"Medellín", short:"Medellín", art:"antioquia", img:"medellin", dates:"18–21 août", nights:3, arrive:"day", legDetail:"bus de jour Salento/Armenia→Medellín ~6h", ll:[6.2476,-75.5658],
    note:"Comuna 13 & street art, métrocâble au-dessus de la vallée, Pueblito Paisa. Trois nuits pleines dans la ville du printemps éternel, sans excursion à caser.",
-   tip:"Guatapé n'est plus une excursion à la journée depuis ici : vous y dormez le 24. Vous pouvez donc consacrer les trois jours entiers à Medellín même."},
+   tip:"Guatapé n'est plus une excursion à la journée depuis ici : vous y dormez le 21. Vous pouvez donc consacrer les trois jours entiers à Medellín même."},
 
-  {r:"antioquia", n:"Guatapé & le Peñón", short:"Guatapé", art:"lake", img:"guatape", dates:"24–25 août", nights:1, arrive:"day", legDetail:"bus court Medellín→Guatapé ~1h30 (terminal Nord)", ll:[6.2330,-75.1588],
+  {r:"antioquia", n:"Guatapé & le Peñón", short:"Guatapé", art:"lake", img:"guatape", dates:"21–22 août", nights:1, arrive:"day", legDetail:"bus court Medellín→Guatapé ~1h30 (terminal Nord)", ll:[6.2330,-75.1588],
    note:"Le village le plus coloré du pays, ses zócalos peints, et les 740 marches du monolithe pour une vue à 360° sur le lac. Dormir sur place, c'est avoir le village au calme le soir et le Peñón tôt le matin, sans la foule des bus du jour.",
-   tip:"Grimpe le Peñón à l'ouverture (vers 8h) le 25 avant de repartir : c'est le seul créneau sans queue, et vous avez la journée pour redescendre à Medellín prendre le bus de nuit."},
+   tip:"Grimpe le Peñón à l'ouverture (vers 8h) le 22 avant de repartir : c'est le seul créneau sans queue, et vous avez la journée pour redescendre à Medellín prendre le bus de nuit."},
 
   /* One numbered étape, three separate places to sleep — hence the dated `subs`.
      Splitting it into three STOPS entries would show 10 étapes instead of 8. */
-  {r:"caraibe", n:"Cartagena & les îles", short:"Cartagena", art:"colonial", img:"cartagena", dates:"26 août – 1 sept.", nights:6, arrive:"night", legDetail:"retour Guatapé→Medellín ~1h30, puis bus de nuit Medellín→Cartagena ~12-14h (nuit du 25 au 26)", ll:[10.3932,-75.4832],
+  {r:"caraibe", n:"Cartagena & les îles", short:"Cartagena", art:"colonial", img:"cartagena", dates:"23–29 août", nights:6, arrive:"night", legDetail:"retour Guatapé→Medellín ~1h30, puis bus de nuit Medellín→Cartagena ~12-14h (nuit du 22 au 23)", ll:[10.3932,-75.4832],
    note:"Le plus long bloc du séjour : 6 nuits en descendant vers le sud, de la ville murée aux archipels. Remparts au coucher du soleil et Getsemaní le soir, puis deux îles de plus en plus au large.",
-   tip:"La remontée du 1er septembre est la journée la plus lourde du séjour : lancha depuis San Bernardo puis bus jusqu'à Santa Marta. Réserve la lancha directe vers Cartagena (~2h) plutôt que le combiné bateau + bus via Tolú, qui rallonge de 2 bonnes heures.",
+   tip:"La remontée du 29 août est la journée la plus lourde du séjour : lancha depuis San Bernardo puis bus jusqu'à Santa Marta. Réserve la lancha directe vers Cartagena (~2h) plutôt que le combiné bateau + bus via Tolú, qui rallonge de 2 bonnes heures.",
    subs:[
-     {n:"Cartagena — ville murée", art:"colonial", img:"cartagena", dates:"26–27 août", nights:2, ll:[10.4236,-75.5478], note:"Deux nuits intra-muros ou à Getsemaní, juste après le bus de nuit. Remparts, façades colorées, sortie du soir sans avoir à reprendre un bateau."},
-     {n:"Islas del Rosario", art:"island", img:"islas-rosario", dates:"28–29 août", nights:2, ll:[10.1783,-75.7500], note:"Parc national corallien à ~1h de lancha de Cartagena. Eau claire, éco-lodges sans voitures, plancton bioluminescent la nuit sur Isla Grande."},
-     {n:"Îles de San Bernardo", art:"island", img:"san-bernardo", dates:"30–31 août", nights:2, ll:[9.7363,-75.7437], note:"Le plus au large et le plus beau : Isla Múcura, Tintipán, Santa Cruz del Islote. Environ 1h30 de bateau depuis Rosario, en continuant vers le sud."},
+     {n:"Cartagena — ville murée", art:"colonial", img:"cartagena", dates:"23–24 août", nights:2, ll:[10.4236,-75.5478], note:"Deux nuits intra-muros ou à Getsemaní, juste après le bus de nuit. Remparts, façades colorées, sortie du soir sans avoir à reprendre un bateau."},
+     {n:"Islas del Rosario", art:"island", img:"islas-rosario", dates:"25–26 août", nights:2, ll:[10.1783,-75.7500], note:"Parc national corallien à ~1h de lancha de Cartagena. Eau claire, éco-lodges sans voitures, plancton bioluminescent la nuit sur Isla Grande."},
+     {n:"Îles de San Bernardo", art:"island", img:"san-bernardo", dates:"27–28 août", nights:2, ll:[9.7363,-75.7437], note:"Le plus au large et le plus beau : Isla Múcura, Tintipán, Santa Cruz del Islote. Environ 1h30 de bateau depuis Rosario, en continuant vers le sud."},
    ]},
 
-  {r:"caraibe", n:"Santa Marta & la Sierra", short:"Santa Marta", art:"sierra", img:"santa-marta", dates:"1–4 sept.", nights:3, arrive:"day", legDetail:"bus de jour Cartagena→Santa Marta ~4-5h", ll:[11.2404,-74.2110],
+  {r:"caraibe", n:"Santa Marta & la Sierra", short:"Santa Marta", art:"sierra", img:"santa-marta", dates:"29 août – 1 sept.", nights:3, arrive:"day", legDetail:"bus de jour Cartagena→Santa Marta ~4-5h", ll:[11.2404,-74.2110],
    note:"Dernier camp de base caraïbe, en base groupée unique. D'ici, on rayonne à la journée : Minca dans la montagne, Tayrona sur la mer, Taganga pour le coucher de soleil.",
-   tip:"Priorise Tayrona si le temps presse : c'est l'expérience la plus forte du trio Minca/Tayrona/Taganga.",
+   tip:"Le 1er septembre, le vol pour Leticia décolle à 12h : garde la matinée libre et fais Tayrona ou Minca avant, pas le jour du départ.",
    subs:[
      {n:"Minca", art:"sierra", img:"minca", ll:[11.1428,-74.1167], note:"Village de montagne : cascades, fermes de café et de cacao, lever de soleil sur la Sierra Nevada."},
      {n:"Parc Tayrona", art:"sierra", img:"tayrona", ll:[11.3064,-74.0658], note:"Jungle qui plonge dans la mer, Cabo San Juan et La Piscina. Arrive tôt, la chaleur monte vite."},
      {n:"Taganga", art:"island", img:"taganga", ll:[11.2685,-74.1871], note:"Village de pêcheurs, plongée abordable, coucher de soleil sur la baie."},
    ]},
 
-  {r:"andes", n:"Bogotá — départ", short:"Bogotá", art:"city", img:"bogota-depart", dates:"4–5 sept.", nights:1, arrive:"flight", legDetail:"vol direct Santa Marta→Bogotá le 4 en journée, ~1h30 (plus de bus de nuit au retour)", ll:[4.7110,-74.0721],
-   note:"Retour par les airs plutôt qu'un bus de 17h : la dernière journée reste utilisable. Une nuit à Bogotá, puis le vol international du 5 à 21h35 — de quoi faire La Candelaria ou Monserrate le 5.",
-   tip:"Avec une seule nuit et un vol le soir du 5, dors près de l'aéroport ou dans un quartier bien relié (Chapinero, Teusaquillo) plutôt qu'au cœur de La Candelaria."},
+  /* Moved to the end of the trip (sept.) — the Amazon is now the finale rather
+     than an early round trip out of Bogotá. Two places to sleep: one night in
+     Leticia to land softly, then two nights deep in the jungle. */
+  {r:"amazon", n:"Leticia & l'Amazonie", short:"Amazonie", art:"amazon", img:"leticia", dates:"1–4 sept.", nights:3, arrive:"flight", legDetail:"vol Santa Marta→Leticia le 1er, 12h→17h (correspondance à Bogotá — pas de liaison directe)", ll:[-4.2032,-69.9359],
+   note:"Le bouquet final : après trois semaines de montagne et de Caraïbes, la triple-frontière Colombie/Brésil/Pérou, le fleuve Amazone, les dauphins roses. Une nuit à Leticia pour atterrir en douceur, puis deux nuits en pleine jungle.",
+   tip:"⚠ Le 4 au matin il faut ressortir de la jungle pour attraper le vol Leticia→Bogotá : compte ~2h de bateau depuis Puerto Nariño. Cale un départ tôt avec le lodge, et prends le vol le plus tardif possible ce jour-là.",
+   subs:[
+     {n:"Leticia — ville", art:"amazon", img:"leticia", dates:"1–2 sept.", nights:1, ll:[-4.2032,-69.9359], note:"Arrivée à 17h : une nuit en ville pour souffler, dîner au Parque Santander et caler l'excursion du lendemain avec une agence."},
+     {n:"Lodge en jungle — Puerto Nariño", art:"amazon", img:"puerto-narino", dates:"2–4 sept.", nights:2, ll:[-3.7889,-70.3556], note:"Deux nuits au cœur de l'Amazonie : village sans voitures, lac Tarapoto, dauphins roses, parc Amacayacu. C'est là que le voyage se termine."},
+   ]},
+
+  {r:"andes", n:"Bogotá — départ", short:"Bogotá", art:"city", img:"bogota-depart", dates:"4–5 sept.", nights:1, arrive:"flight", legDetail:"vol Leticia→Bogotá le 4 en journée, ~2h en direct", ll:[4.7110,-74.0721],
+   note:"Dernière nuit, en transit. Le vol international part le 5 à 21h35 : la journée du 5 reste entièrement libre pour Monserrate, La Candelaria ou Zipaquirá.",
+   tip:"Avec un vol le soir du 5, tu peux garder tes bagages à l'hébergement et occuper la journée. Compte 3h avant le vol, donc départ vers l'aéroport aux alentours de 18h."},
 ];
 
 /* ---------- PER-STOP DETAIL (kept out of STOPS so the itinerary data stays untouched) ----------
@@ -490,12 +488,9 @@ const STOPS=[
    indicative hors repas et activités. weather = moyennes saisonnières fin août. */
 const DETAILS=[
   {travel:"Vol d'arrivée",        travelSub:"atterrissage 19h25 à El Dorado",
-   budget:{eur:45,level:2,note:"une seule nuit — proche aéroport ou Chapinero"},
+   budget:{eur:45,level:2,note:"une seule nuit, puis journée libre le 16"},
    weather:{t:"19° / 9°",note:"frais à 2 600 m, averses en fin de journée"}},
-  {travel:"Vol ≈ 2 h",            travelSub:"Bogotá→Leticia, direct, sans correspondance",
-   budget:{eur:55,level:2,note:"plus cher : tout arrive par avion ou par le fleuve"},
-   weather:{t:"31° / 22°",note:"humide, eaux basses en août — bon pour marcher"}},
-  {travel:"Vol 2 h + bus de nuit",travelSub:"Leticia→Bogotá le 19, puis bus de nuit →Salento",
+  {travel:"Bus de nuit",          travelSub:"Bogotá→Salento via Armenia, nuit du 16 au 17",
    budget:{eur:40,level:1,note:"l'étape la moins chère — mais une seule nuit"},
    weather:{t:"23° / 12°",note:"éclaircies, averses courtes l'après-midi"}},
   {travel:"Bus ≈ 6 h",            travelSub:"bus de jour Salento/Armenia→Medellín",
@@ -510,8 +505,11 @@ const DETAILS=[
   {travel:"Bus ≈ 4–5 h",          travelSub:"bus de jour Cartagena→Santa Marta",
    budget:{eur:50,level:2,note:"chambre double, centre ou El Rodadero"},
    weather:{t:"33° / 26°",note:"le plus chaud du voyage ; Minca reste frais en altitude"}},
-  {travel:"Vol ≈ 1 h 30",         travelSub:"vol direct Santa Marta→Bogotá le 4",
-   budget:{eur:45,level:2,note:"une nuit, proche de l'aéroport pour le vol du 5 au soir"},
+  {travel:"Vol 12h → 17h",        travelSub:"Santa Marta→Leticia, correspondance à Bogotá",
+   budget:{eur:"55–75",level:3,note:"ville ~55 € ; un lodge en jungle monte vers 75 €"},
+   weather:{t:"31° / 22°",note:"humide toute l'année, eaux basses début septembre"}},
+  {travel:"Vol ≈ 2 h",            travelSub:"vol direct Leticia→Bogotá le 4",
+   budget:{eur:45,level:2,note:"une nuit de transit avant le vol du 5 au soir"},
    weather:{t:"19° / 9°",note:"frais et venteux, pluie possible début septembre"}},
 ];
 
@@ -581,334 +579,373 @@ const LODGING=[
   {stop:0, key:"bogota-in", name:"Bogotá — arrivée", nights:1,
    checkin:`${YEAR}-08-15`, checkout:`${YEAR}-08-16`,
    search:"Bogotá, Colombie", searchOriginal:"La Candelaria, Bogotá, Colombie",
-   areas:"Atterrissage à 19h25, départ le lendemain pour Leticia : la priorité est la proximité, pas le charme. <b>Fontibón / Salitre</b> pour être à 10 min d'El Dorado, <b>Chapinero</b> ou <b>Teusaquillo</b> pour un vrai quartier vivant à 25 min de l'aéroport. Évite La Candelaria pour cette nuit-là : c'est joli mais à 40 min, et vous arriverez fatigués.",
+   areas:"Nouveauté du planning inversé : vous avez désormais <b>toute la journée du 16</b> avant le bus du soir pour Salento. La Candelaria redevient donc un choix pertinent dès l'aller, alors qu'elle était à éviter dans l'ancien plan.",
    cats:{
-     abordable:{guide:"Airbnb plafonne autour de 50 € à Bogotá : la gamme « abordable » y est déjà très confortable. Pour une arrivée à 19h25 et un vol tôt le lendemain, j'ai priorisé la proximité aéroport.",
+     abordable:{guide:"Airbnb plafonne autour de 50 € à Bogotá : la gamme « abordable » y est déjà très confortable.",
        picks:[
          {nom:"Appartement 101 à 5 min de l'aéroport", zone:"Fontibón", eur:29, note:"4,80", avis:245, airbnb:"1365980663701917223",
-          extra:"Superhôte. Le meilleur compromis prix / trajet pour cette nuit-là : appartement entier, 1 lit."},
+          extra:"Superhôte. Le plus simple après un atterrissage à 19h25."},
          {nom:"Appartement en face du centre commercial — Aéroport", zone:"Engativá", eur:37, note:"4,94", avis:52, airbnb:"1651131420459399460",
-          extra:"« Coup de cœur voyageurs », meilleure note de la tranche basse. Côté aéroport, en face du centre commercial."},
+          extra:"« Coup de cœur voyageurs », meilleure note de la tranche basse."},
          {nom:"Charmant appartement à côté du Musée de l'Or", zone:"Santa Fe", eur:39, note:"4,88", avis:135, airbnb:"1314649227081395099",
-          extra:"Si vous préférez le centre à l'aéroport : à pied du Musée de l'Or et de La Candelaria."},
+          extra:"À pied du Musée de l'Or et de La Candelaria — avec la journée du 16 libre, c'est enfin exploitable."},
        ]},
-     confort:{guide:"Au-dessus de 55 €, Airbnb n'a presque plus rien à Bogotá — c'est Booking et l'hôtellerie qui prennent le relais, avec réception 24h et navette, précieux pour une arrivée tardive.",
+     confort:{guide:"Au-dessus de 55 €, c'est Booking et l'hôtellerie qui prennent le relais, avec réception 24h — précieux pour une arrivée tardive.",
        picks:[
          {nom:"NH Collection Bogotá WTC Royal", zone:"Salitre / World Trade Center", eur:68, note:"8,6", avis:1507, booking:"co/bogota-royal",
-          extra:"Chambre double supérieure. Côté aéroport, réception 24h — la valeur sûre pour une arrivée 19h25."},
+          extra:"Chambre double supérieure. Côté aéroport, réception 24h."},
          {nom:"NH Collection Bogotá Terra 100 Royal", zone:"Zona 100 / Chicó", eur:69, note:"8,6", avis:686, booking:"co/terra-100-royal",
-          extra:"Chambre double supérieure. Quartier plus vivant le soir si vous voulez dîner dehors."},
+          extra:"Quartier plus vivant le soir si vous voulez dîner dehors."},
          {nom:"Santafe Boutique Hotel", zone:"Santa Fe", eur:70, note:"8,6", avis:403, booking:"co/santa-fe-boutique",
-          extra:"Suite Junior à ce prix — le plus d'espace des trois, esprit boutique plutôt que chaîne."},
+          extra:"Suite Junior à ce prix — le plus d'espace des trois."},
        ]},
-     original:{guide:"C'est à La Candelaria que Bogotá devient intéressante : maisons coloniales restaurées, balcons de bois, patios, terrasses sur les toits avec le Monserrate en face. Contrepartie : 40 min de l'aéroport.",
+     original:{guide:"Maisons coloniales restaurées de La Candelaria : balcons de bois, patios, Monserrate en toile de fond.",
        picks:[
          {nom:"Balcons. La Candelaria", zone:"La Candelaria", eur:67, note:"4,89", avis:546, airbnb:"48218124",
-          extra:"546 avis à 4,89 — le plus éprouvé du lot. Les balcons de bois typiques du centre colonial."},
+          extra:"546 avis à 4,89 — le plus éprouvé du lot."},
          {nom:"Jardin. La Candelaria", zone:"La Candelaria", eur:67, note:"4,88", avis:576, airbnb:"48215522",
           extra:"Même famille de logements, avec un jardin. 576 avis."},
          {nom:"Beau studio lumineux @ Casa Rosada", zone:"La Candelaria", eur:71, note:"4,98", avis:58, airbnb:"1329675381123566728",
-          extra:"4,98 de moyenne, la meilleure note trouvée à Bogotá toutes catégories confondues."},
+          extra:"4,98 de moyenne, la meilleure note trouvée à Bogotá."},
        ]},
    },
-   note:"Alternative « originale » à petit prix si le budget compte plus que le confort : <b>Belle maison avec terrasse et vue 360°</b> à La Candelaria, 30 €, 4,74 (38 avis). ⚠ Une seule nuit avec arrivée à 19h25 : vérifie l'heure limite d'arrivée, beaucoup de petits Airbnb à Bogotá refusent après 22h — c'est l'avantage des trois hôtels ci-dessus."},
+   note:"Dates inchangées par le réagencement — ces prix restent ceux relevés initialement. ⚠ Vérifie l'heure limite d'arrivée : beaucoup de petits Airbnb à Bogotá refusent après 22h, d'où l'intérêt des trois hôtels."},
 
-  {stop:1, key:"leticia", name:"Leticia & l'Amazonie", nights:3,
-   checkin:`${YEAR}-08-16`, checkout:`${YEAR}-08-19`,
-   search:"Leticia, Amazonas, Colombie", searchOriginal:"Puerto Nariño, Amazonas, Colombie",
-   areas:"Leticia est une petite ville : tout le centre est à distance de marche, et c'est là que se trouvent les agences pour les excursions fluviales. Le vrai choix, c'est <b>rester en ville</b> (pratique, climatisé, moins cher) ou <b>dormir en lodge sur le fleuve</b> (l'expérience, mais on se coupe des services).",
-   cats:{
-     abordable:{guide:"Le centre de Leticia est petit et tout se fait à pied. À ce prix on a déjà un logement entier avec climatisation — non négociable ici, il fait 31° et très humide.",
-       picks:[
-         {nom:"Chambre double avec climatisation", zone:"Centre de Leticia", eur:35, total:106, note:"4,94", avis:18, airbnb:"1491417455452532794",
-          extra:"Malgré son nom, c'est un logement entier avec 1 lit double. Meilleure note de la tranche basse."},
-         {nom:"Minimaliste Amazon", zone:"Leticia", eur:36, total:107, note:"4,82", avis:17, airbnb:"889355087756776458",
-          extra:"Appartement entier, 1 chambre / 2 lits. Sobre et bien noté."},
-         {nom:"BHB — ApartaHotel", zone:"Leticia", eur:39, total:118, note:"8,5", avis:254, booking:"co/batara-boutique-leticia",
-          extra:"Appartement entier 2 chambres. 254 avis : de loin le plus éprouvé de la tranche basse."},
-       ]},
-     confort:{guide:"C'est la gamme où la climatisation et le petit-déjeuner deviennent systématiques, et où l'on trouve une piscine — un vrai luxe après une journée sur le fleuve.",
-       picks:[
-         {nom:"Hotel Alto Amazonas", zone:"Leticia", eur:54, total:161, note:"9,1", avis:130, booking:"co/alto-amazonas",
-          extra:"Chambre double 1 grand lit, <b>petit-déjeuner compris</b>. 9,1 sur 130 avis — le meilleur rapport qualité/prix du lot."},
-         {nom:"Hotel Madreselva", zone:"Leticia", eur:58, total:175, note:"8,4", avis:945, booking:"co/madreselva-leticia1",
-          extra:"945 avis, la valeur la plus sûre de Leticia. Attention : la chambre proposée à ce tarif est une triple avec 1 simple + 1 double."},
-         {nom:"Family Amazon Minimalist", zone:"Leticia", eur:72, total:217, note:"9,0", avis:46, booking:"co/family-amazon-minimalist",
-          extra:"Appartement entier 2 chambres, noté 9,0. Le plus d'espace si vous voulez cuisiner sur place."},
-       ]},
-     original:{guide:"La catégorie la plus intéressante du voyage. Ici « original » veut dire quitter la ville : réserve naturelle, jungle, maloka. Contrepartie : moto-taxi ou colectivo pour rejoindre le centre, et pas toujours d'électricité 24h.",
-       picks:[
-         {nom:"Palmayacu — Refugio Amazónico", zone:"Reserva Natural Cerca Viva, km 11", eur:67, total:200, note:"8,9", avis:54, booking:"co/palmayacu-refugio-amazonico",
-          extra:"Vérifié : vraiment dans une réserve naturelle à 11 km de Leticia. Terrasse et patio sur jardin, salle de bain privative ; cuisine et salon partagés. Prévois le moto-taxi pour le centre."},
-         {nom:"Séjour dans la jungle à Moreda", zone:"Jungle, près de Leticia", eur:34, total:102, note:"5,0", avis:9, airbnb:"1593698232137411062",
-          extra:"5,0 de moyenne. Chambre privée avec salle de bain — l'exception « chambre privée » se justifie ici par le cadre."},
-         {nom:"Maloka — Casa do Xingu", zone:"Tabatinga, <b>Brésil</b>", eur:16, total:49, note:"5,0", avis:4, airbnb:"1388012603391221908",
-          extra:"Une vraie maloka pour 49 € les 3 nuits. ⚠ Côté brésilien de la frontière : Tabatinga est collée à Leticia, mais vérifie les formalités de sortie/entrée. Seulement 4 avis."},
-       ]},
-   },
-   note:"⚠ Offre très limitée : Leticia compte peu d'hébergements et août est haute saison — réserve tôt. Les prix affichés sont <b>par nuit, calculés depuis le total 3 nuits</b> que renvoient les plateformes. Les lodges les plus isolés (côté Puerto Nariño, lac Tarapoto) ne sont souvent pas sur Airbnb/Booking du tout et se réservent par WhatsApp : si l'Amazonie profonde vous tente, garde 1 nuit libre à réserver sur place."},
-
-  {stop:2, key:"salento", name:"Salento & Cocora", nights:1,
-   checkin:`${YEAR}-08-20`, checkout:`${YEAR}-08-21`,
+  {stop:1, key:"salento", name:"Salento & Cocora", nights:1,
+   checkin:`${YEAR}-08-17`, checkout:`${YEAR}-08-18`,
    search:"Salento, Quindío, Colombie",
-   areas:"Le pueblo est minuscule : tout est à 5 min à pied de la Calle Real et de la place d'où partent les jeeps Willys pour Cocora. Une seule nuit, arrivée du bus de nuit le 20 au matin et départ le 21 tôt — vise le centre, pas une finca isolée, sauf si l'expérience compte plus que le sommeil.",
+   areas:"Le pueblo est minuscule : tout est à 5 min à pied de la Calle Real et de la place d'où partent les jeeps Willys pour Cocora. Arrivée du bus de nuit le 17 au matin, départ le 18 tôt — vise le centre.",
    cats:{
-     abordable:{guide:"L'étape la moins chère du voyage : logement entier bien noté dès 33 €. Avec une arrivée matinale en bus de nuit, demande un dépôt de bagages si la chambre n'est pas prête avant 15h.",
+     abordable:{guide:"L'étape la moins chère du voyage. Avec une arrivée matinale en bus de nuit, demande un dépôt de bagages si la chambre n'est pas prête avant 15h.",
        picks:[
-         {nom:"Studios La Baranda 1", zone:"Salento centre", eur:33, note:"4,83", avis:6, airbnb:"1611174298352494598",
-          extra:"Le moins cher en logement entier. ⚠ Seulement 6 avis — récent, donc moins éprouvé que les autres."},
-         {nom:"Cabane avec salle de bain privée", zone:"Salento", eur:38, note:"4,93", avis:94, airbnb:"998086555674928628",
-          extra:"Une vraie cabane, 1 lit double, 4,93 sur 94 avis. Le meilleur rapport charme/prix/fiabilité de l'étape."},
-         {nom:"Appartement privé central + cuisine", zone:"Salento centre", eur:39, note:"4,90", avis:41, airbnb:"1391321299294389606",
-          extra:"2 chambres, 2 lits doubles, cuisine et Wi-Fi. Pratique si vous voulez dîner sur place après Cocora."},
+         {nom:"Apartastudio makana 2", zone:"Salento", eur:28, note:"4,71", avis:175, airbnb:"52807957",
+          extra:"175 avis et le prix le plus bas en logement entier."},
+         {nom:"Nature · Calme · Privé · Wifi · Cuisine", zone:"Salento", eur:37, note:"4,88", avis:101, airbnb:"1433642105408503934",
+          extra:"4,88 sur 101 avis, avec cuisine — pratique pour dîner après Cocora."},
+         {nom:"Cabane avec salle de bain privée", zone:"Salento", eur:39, note:"4,93", avis:95, airbnb:"998086555674928628",
+          extra:"Une vraie cabane, 1 lit double, 4,93 sur 95 avis. Le meilleur rapport charme/prix/fiabilité."},
        ]},
-     confort:{guide:"Au-dessus de 60 €, Salento offre des lofts et appartements plus spacieux — un peu superflu pour une seule nuit, mais utile si vous voulez vraiment récupérer du bus de nuit.",
+     confort:{guide:"Un peu superflu pour une seule nuit, mais utile si vous voulez vraiment récupérer du bus de nuit.",
        picks:[
-         {nom:"Hope Aparta Lofts H5", zone:"Salento", eur:67, note:"4,78", avis:63, airbnb:"1307345539711679338",
-          extra:"Loft 1 chambre / 2 lits. Le plus classique du lot."},
-         {nom:"Spacieux appartement lumineux et charmant", zone:"Salento", eur:72, note:"4,83", avis:47, airbnb:"1617399219948618669",
-          extra:"Prévu pour 4 personnes — beaucoup d'espace à deux."},
-         {nom:"Salento Stay #306 — Privé, Jacuzzi, lit King", zone:"Salento", eur:75, note:"4,88", avis:239, airbnb:"49162058",
-          extra:"239 avis, jacuzzi privé et lit king. ⚠ C'est une suite privative <b>au sein d'un établissement type auberge</b> — privé et fermé, mais tu croiseras du monde dans les parties communes."},
+         {nom:"Salento Stay #303 — lit King, SmartTV", zone:"Salento", eur:45, note:"4,82", avis:179, airbnb:"857274060018366876",
+          extra:"179 avis, lit king de 2 m."},
+         {nom:"Aroma Café — vue sur la montagne", zone:"Salento", eur:70, note:"4,94", avis:47, airbnb:"1617398944764984301",
+          extra:"4,94. Typique et moderne, avec vue montagne."},
+         {nom:"Salento Stay #306 — Privé, jacuzzi, lit King", zone:"Salento", eur:76, note:"4,88", avis:240, airbnb:"49162058",
+          extra:"240 avis, jacuzzi privé. ⚠ Suite privative <b>au sein d'un établissement type auberge</b>."},
        ]},
-     original:{guide:"C'est ici que Salento se démarque : la zone café se prête au glamping et aux maisons paysannes. Le pueblo est assez petit pour que « à l'écart » reste à 10 min à pied.",
+     original:{guide:"La zone café se prête au glamping et aux tiny houses, et le pueblo est assez petit pour que « à l'écart » reste à 10 min à pied.",
        picks:[
-         {nom:"Hobbit Glamping — Luna Glamping", zone:"Salento", eur:74, note:"4,99", avis:110, airbnb:"1108015854403568179",
-          extra:"<b>4,99 sur 110 avis</b> — la meilleure note de tout le voyage. Glamping façon maison de hobbit. Si une seule folie doit être faite, c'est celle-là."},
-         {nom:"Maison « El canto de los gallos »", zone:"Salento", eur:46, note:"4,97", avis:59, airbnb:"1385738133247843594",
-          extra:"« Le chant des coqs » — maison entière, 2 chambres, 4,97. L'option la plus authentiquement locale."},
-         {nom:"Maison Entre Oiseaux", zone:"Salento", eur:42, note:"4,94", avis:128, airbnb:"46663067",
-          extra:"128 avis à 4,94. Chambre privée avec salle de bain, dans une maison tournée vers l'observation des oiseaux."},
+         {nom:"Hobbit Glamping — Luna Glamping", zone:"Salento", eur:75, note:"4,99", avis:110, airbnb:"1108015854403568179",
+          extra:"<b>4,99 sur 110 avis</b> — la meilleure note de tout le voyage. Glamping façon maison de hobbit."},
+         {nom:"Petit studio Frailejones — tiny house", zone:"Salento", eur:46, note:"4,91", avis:295, airbnb:"53050373",
+          extra:"<b>295 avis à 4,91.</b> Tiny house — nouvelle trouvaille de cette recherche, et la plus éprouvée de Salento."},
+         {nom:"Chambre privée chaleureuse à 20 m du parc", zone:"Salento centre", eur:33, note:"4,81", avis:285, airbnb:"997234557328442109",
+          extra:"285 avis, à 20 mètres de la place des jeeps Willys."},
        ]},
    },
-   note:"Rappel du planning : avec une seule nuit, la journée du 20 est entièrement prise par Cocora (départ tôt en Willys) et le retour. C'est l'étape où un logement au centre, à 2 min de la place des jeeps, vaut plus qu'une belle vue à 15 min."},
+   note:"⚠ Le décalage de 3 jours a fait disparaître 6 de mes 9 pistes précédentes (dont la Maison « El canto de los gallos » et la Maison Entre Oiseaux). Celles ci-dessus sont bien disponibles au 17-18 août."},
 
-  {stop:3, key:"medellin", name:"Medellín", nights:3,
-   checkin:`${YEAR}-08-21`, checkout:`${YEAR}-08-24`,
-   search:"Medellín, Colombie", searchOriginal:"Las Palmas, Medellín, Colombie",
-   areas:"Deux quartiers dominent. <b>El Poblado / Provenza</b> : le plus pratique et le plus animé, métro et restaurants à pied — mais bruyant le week-end. <b>Laureles / Manila</b> : plus calme et plus local, à une station de métro. Guatapé n'étant plus une excursion, les 3 jours sont entièrement pour la ville.",
+  {stop:2, key:"medellin", name:"Medellín", nights:3,
+   checkin:`${YEAR}-08-18`, checkout:`${YEAR}-08-21`,
+   search:"Medellín, Colombie", searchOriginal:"Sabaneta, Antioquia, Colombie",
+   areas:"<b>El Poblado / Provenza</b> : le plus pratique et le plus animé, métro et restaurants à pied. <b>Laureles / Manila</b> : plus calme et local. Guatapé n'étant plus une excursion, les 3 jours sont entièrement pour la ville.",
    cats:{
-     abordable:{guide:"⚠ À noter : sur 3 nuits en août, le plancher réel pour un logement entier correct à Medellín est autour de <b>46 €</b>, soit légèrement au-dessus du repère de 45 € de cette catégorie. En dessous, on tombe sur des chambres privées.",
+     abordable:{guide:"Contrairement à la recherche précédente, les nouvelles dates offrent du logement entier bien noté dès 36 € — c'est mieux qu'avant.",
        picks:[
-         {nom:"Chambre privée, village", zone:"Manila", eur:31, total:94, note:"4,70", avis:47, airbnb:"1577820710459198001",
-          extra:"Le seul vrai « pas cher » de la sélection, dans le quartier calme de Manila. Note plus modeste (4,70)."},
-         {nom:"Loft Poblado — climatisation, WiFi rapide", zone:"El Poblado", eur:46, total:138, note:"4,82", avis:153, airbnb:"1152135982079745771",
-          extra:"153 avis. Le meilleur compromis emplacement / prix / fiabilité des trois nuits."},
-         {nom:"Bel appartement central, parking gratuit", zone:"El Tesoro", eur:48, total:145, note:"4,83", avis:133, airbnb:"669605800361971748",
-          extra:"133 avis. Un peu au-dessus de Poblado sur la colline, donc plus calme le soir."},
+         {nom:"À quelques pas du parc Lleras, cœur de Poblado", zone:"El Poblado", eur:36, total:109, note:"4,84", avis:246, airbnb:"942291854932346491",
+          extra:"246 avis, en plein cœur de Poblado."},
+         {nom:"Appartement au cœur de Medellín (El Poblado)", zone:"El Poblado", eur:39, total:118, note:"4,96", avis:67, airbnb:"1022720887058326665",
+          extra:"<b>4,96</b> — la meilleure note de la tranche basse."},
+         {nom:"Loft près de Provenza · Wi-Fi rapide · clim", zone:"El Poblado", eur:40, total:121, note:"4,79", avis:174, airbnb:"1162946935355646772",
+          extra:"174 avis, climatisé et très bien situé."},
        ]},
-     confort:{guide:"Provenza concentre les meilleures notes de la ville. À ce prix, la climatisation est systématique — utile à 1 500 m mais avec 27° en journée.",
+     confort:{guide:"Provenza concentre les meilleures notes de la ville. À ce prix, la climatisation est systématique.",
        picks:[
-         {nom:"Appartement lumineux — balcon Provenza", zone:"El Poblado / Provenza", eur:60, total:181, note:"4,71", avis:41, airbnb:"54206769",
-          extra:"Logement entier avec balcon, en plein Provenza."},
-         {nom:"Magnifique chambre Provenza n° 3", zone:"El Poblado / Provenza", eur:63, total:188, note:"4,98", avis:118, airbnb:"1062519802936703144",
-          extra:"<b>4,98 sur 118 avis</b>. Chambre privée : l'exception se justifie par la note et l'emplacement."},
-         {nom:"Chambre élégante Provenza + coworking", zone:"El Poblado / Provenza", eur:69, total:206, note:"4,89", avis:199, airbnb:"923903757802032133",
-          extra:"199 avis. Établissement type hôtel avec espace de coworking — pratique si tu dois bosser un peu."},
+         {nom:"Magnifique chambre Provenza n° 3", zone:"El Poblado / Provenza", eur:55, total:164, note:"4,98", avis:118, airbnb:"1062519802936703144",
+          extra:"<b>4,98 sur 118 avis</b> — le seul de mes anciens choix encore disponible, et il a même baissé de prix."},
+         {nom:"Studio + clim + WiFi · 1 min du parc Poblado", zone:"El Poblado", eur:65, total:195, note:"4,86", avis:167, airbnb:"961198177943358791",
+          extra:"167 avis, à une minute à pied du parc."},
+         {nom:"Energy Living — 2 ch / 2 sdb, près de Provenza", zone:"El Poblado", eur:74, total:221, note:"4,96", avis:202, airbnb:"904500137380173616",
+          extra:"<b>4,96 sur 202 avis.</b> Deux chambres, deux salles de bain — beaucoup d'espace."},
        ]},
-     original:{guide:"Recherche honnête : <b>Medellín n'a pas de logement vraiment atypique dans ce budget</b>. L'offre est massivement composée d'appartements modernes. Ce qui sort du lot, ce sont les lofts perchés sur la colline de Las Palmas avec vue sur la vallée — beaux, mais des annonces récentes avec très peu d'avis. Je préfère te le dire que de compléter avec du médiocre pour arriver à trois.",
+     original:{guide:"Bonne nouvelle par rapport à la recherche précédente : les nouvelles dates font apparaître une <b>maison en terre</b> à Sabaneta. Medellín n'était pas du tout servie sur ce créneau la dernière fois.",
        picks:[
-         {nom:"Superbe loft à Encanto, vue sur la ville", zone:"Las Palmas (colline)", eur:80, total:241, note:"5,0", avis:7, airbnb:"1655092240655581655",
-          extra:"Vue plongeante sur la vallée depuis Las Palmas. ⚠ 7 avis seulement, et sur la colline : prévois Uber/taxi pour descendre en ville."},
-         {nom:"Loft de luxe avec jacuzzi privé", zone:"El Poblado", eur:68, total:205, note:"5,0", avis:3, airbnb:"1679804794262329613",
-          extra:"⚠ 3 avis seulement — annonce très récente. À réserver seulement si les photos te convainquent."},
+         {nom:"eDeensabaneta — cabine « Majorque », maison en terre", zone:"Sabaneta", eur:50, total:151, note:"4,94", avis:192, airbnb:"1064511970836198373",
+          extra:"<b>Maison en terre, 4,94 sur 192 avis.</b> La vraie trouvaille de Medellín. Sabaneta est au sud de la vallée, desservi par le métro."},
+         {nom:"Loft chic avec jacuzzi et terrasse à Provenza", zone:"El Poblado / Provenza", eur:45, total:135, note:"4,67", avis:94, airbnb:"564940558540316527",
+          extra:"Jacuzzi et terrasse privés. Note plus modeste (4,67)."},
+         {nom:"WiFi 200 Mb · nature · piscine · Poblado", zone:"El Poblado", eur:54, total:161, note:"4,73", avis:348, airbnb:"53749801",
+          extra:"<b>348 avis.</b> Loft moderne avec piscine, dans la verdure de Poblado."},
        ]},
    },
-   note:"L'« original » de Medellín, c'est la ville et pas la chambre : Comuna 13, métrocâble au-dessus de la vallée, Pueblito Paisa. Mets le budget sur l'emplacement (Provenza ou Laureles) plutôt que sur un logement insolite qui n'existe pas vraiment ici."},
+   note:"Aucun de mes anciens choix Medellín sauf un n'était disponible aux nouvelles dates — cette sélection est presque entièrement neuve, et globalement meilleure (volumes d'avis plus élevés)."},
 
-  {stop:4, key:"guatape", name:"Guatapé & le Peñón", nights:1,
-   checkin:`${YEAR}-08-24`, checkout:`${YEAR}-08-25`,
+  {stop:3, key:"guatape", name:"Guatapé & le Peñón", nights:1,
+   checkin:`${YEAR}-08-21`, checkout:`${YEAR}-08-22`,
    search:"Guatapé, Antioquia, Colombie",
-   areas:"Le village est petit et coloré : le <b>parc principal</b> et le <b>malecón</b> (front de lac) concentrent tout. Le Peñón est à 3 km — un moto-taxi ou un tuk-tuk suffit. Comme tu veux grimper à l'ouverture le 25, dormir côté village ou côté rocher change surtout ton réveil.",
+   areas:"Le village est petit et coloré : le <b>parc principal</b> et le <b>malecón</b> concentrent tout. Le Peñón est à 3 km — moto-taxi ou tuk-tuk. Tu grimpes à l'ouverture le 22 avant de redescendre à Medellín.",
    cats:{
-     abordable:{guide:"Guatapé est très abordable et l'offre est dense en plein centre. À ce prix on a un logement entier avec vue sur le lac ou sur la place.",
+     abordable:{guide:"Guatapé reste très abordable et l'offre est dense en plein centre.",
        picks:[
          {nom:"Petit appartement parc principal", zone:"Parc principal", eur:30, note:"4,77", avis:182, airbnb:"21057480",
-          extra:"<b>182 avis</b> — le plus éprouvé de Guatapé, et le moins cher. En plein sur la place."},
-         {nom:"Appartement central entouré de jardins", zone:"Guatapé centre", eur:38, note:"4,94", avis:97, airbnb:"1401683123102699101",
-          extra:"4,94 sur 97 avis. Le meilleur équilibre note / prix / emplacement."},
-         {nom:"Cœur de Guatapé — plaza, malecón, arrêt de bus", zone:"Plaza / malecón", eur:42, note:"4,96", avis:53, airbnb:"1649499752355245097",
-          extra:"4,96. <b>À l'arrêt de bus</b> : très pratique puisque vous arrivez et repartez en bus depuis Medellín."},
+          extra:"<b>182 avis</b> — le plus éprouvé de Guatapé, et le moins cher. Prix inchangé malgré le décalage."},
+         {nom:"Chambre au bord du lac", zone:"Bord du lac", eur:42, note:"4,90", avis:162, airbnb:"35450778",
+          extra:"162 avis à 4,90, les pieds dans l'eau."},
+         {nom:"Cœur de Guatapé — plaza, malecón, arrêt de bus", zone:"Plaza / malecón", eur:43, note:"4,96", avis:56, airbnb:"1649499752355245097",
+          extra:"4,96. <b>À l'arrêt de bus</b> : pratique puisque vous arrivez et repartez en bus."},
        ]},
-     confort:{guide:"La gamme haute à Guatapé, c'est la vue : appartements donnant sur le barrage ou belvédères privés, avec des notes remarquables.",
+     confort:{guide:"⚠ Les prix ont nettement monté sur ces dates (le belvédère est passé de 59 à 73 €). La gamme haute, c'est la vue sur le barrage.",
        picks:[
-         {nom:"Belvédère privé au cœur de Guatapé", zone:"Guatapé centre", eur:59, note:"4,93", avis:82, airbnb:"1549316557494600957",
+         {nom:"Appartement 1 chambre centre + petit déjeuner", zone:"Guatapé centre", eur:68, note:"4,98", avis:117, airbnb:"43785073",
+          extra:"4,98 sur 117 avis, <b>petit-déjeuner inclus</b> — utile avant de grimper le Peñón tôt."},
+         {nom:"Belvédère privé au cœur de Guatapé", zone:"Guatapé centre", eur:73, note:"4,93", avis:82, airbnb:"1549316557494600957",
           extra:"4,93 sur 82 avis, avec son propre point de vue."},
-         {nom:"Appartement sur le parc, vue barrage", zone:"Parc principal", eur:65, note:"4,98", avis:101, airbnb:"1461969542076640660",
-          extra:"<b>4,98 sur 101 avis</b> — la meilleure note de Guatapé, vue directe sur le barrage."},
-         {nom:"Appartement 1 chambre centre + petit déjeuner", zone:"Guatapé centre", eur:66, note:"4,98", avis:115, airbnb:"43785073",
-          extra:"4,98 sur 115 avis, <b>petit-déjeuner inclus</b> — pratique avant de grimper le Peñón tôt."},
+         {nom:"Appartement sur le parc, vue barrage", zone:"Parc principal", eur:76, note:"4,98", avis:102, airbnb:"1461969542076640660",
+          extra:"<b>4,98 sur 102 avis</b> — la meilleure note de Guatapé, vue directe sur le barrage."},
        ]},
-     original:{guide:"Guatapé est l'autre bonne étape pour du logement insolite : glamping et chalets face au lac, à quelques minutes du village.",
+     original:{guide:"Glamping et chalets face au lac, à quelques minutes du village.",
        picks:[
-         {nom:"Repos sous la pierre du Peñol", zone:"Au pied du Peñón", eur:44, note:"5,0", avis:55, airbnb:"779914773854422971",
-          extra:"<b>5,0 sur 55 avis</b>, et littéralement au pied du monolithe — exactement ce qu'il faut pour être en haut à l'ouverture le 25 sans la foule."},
-         {nom:"Chalet face au lac, 8 min du parc", zone:"Bord du lac", eur:65, note:"4,82", avis:22, airbnb:"1703313991334844393",
+         {nom:"Chalet face au lac, 8 min du parc", zone:"Bord du lac", eur:74, note:"4,83", avis:24, airbnb:"1703313991334844393",
           extra:"Cabane en bois les pieds dans l'eau, à 8 min du village."},
-         {nom:"NOA Glamping Eucalipto — jacuzzi + petit déj.", zone:"Guatapé", eur:52, note:null, avis:0, airbnb:"1696070927341291024",
-          extra:"Glamping avec jacuzzi et petit-déjeuner. ⚠ Aucun avis pour l'instant : annonce neuve, à réserver seulement sur la foi des photos."},
+         {nom:"NOA Glamping Eucalipto — jacuzzi + petit déj.", zone:"Guatapé", eur:73, note:null, avis:0, airbnb:"1696070927341291024",
+          extra:"Glamping avec jacuzzi et petit-déjeuner. ⚠ Aucun avis : annonce neuve."},
+         {nom:"Apartamento Parque Central", zone:"Parc principal", eur:52, note:"4,88", avis:122, airbnb:"1008201721315826427",
+          extra:"122 avis à 4,88 sur la place centrale — le plus sûr des trois si l'insolite te tente moins."},
        ]},
    },
-   note:"Le 25 vous redescendez à Medellín (~1h30) pour prendre le bus de nuit vers Cartagena le soir : un logement près de l'arrêt de bus ou du Peñón fait gagner une heure sur cette journée déjà chargée."},
+   note:"⚠ « Repos sous la pierre du Peñol » (5,0 / 55 avis), mon coup de cœur de la recherche précédente, <b>n'est plus disponible</b> au 21-22 août. C'était la meilleure option pour grimper le Peñón à l'ouverture ; à surveiller si les dates rebougent."},
 
-  {stop:5, key:"cartagena-ville", name:"Cartagena — ville murée", nights:2,
-   checkin:`${YEAR}-08-26`, checkout:`${YEAR}-08-28`,
+  {stop:4, key:"cartagena-ville", name:"Cartagena — ville murée", nights:2,
+   checkin:`${YEAR}-08-23`, checkout:`${YEAR}-08-25`,
    search:"Cartagena de Indias, Colombie", searchOriginal:"Getsemani, Cartagena de Indias, Colombie",
-   areas:"Quatre quartiers, très différents. <b>Centro / San Diego</b> : intra-muros, le plus beau et le plus cher. <b>Getsemaní</b> : juste à côté des remparts, street art et vie nocturne, le meilleur rapport charme/prix. <b>Manga</b> : résidentiel et calme à 10 min à pied. <b>Crespo / Bocagrande</b> : bord de mer et piscines, mais loin du centre historique — Crespo est côté aéroport.",
+   areas:"<b>Centro / San Diego</b> : intra-muros, le plus beau et le plus cher. <b>Getsemaní</b> : street art et vie nocturne, le meilleur rapport charme/prix. <b>Manga</b> : résidentiel et calme à 10 min à pied. <b>Crespo / La Boquilla</b> : bord de mer, mais loin du centre historique.",
    cats:{
-     abordable:{guide:"Cartagena est l'étape la plus chère du voyage, mais Manga et les abords de Getsemaní restent très accessibles — et à 10 min à pied des remparts.",
+     abordable:{guide:"Manga et les abords de Getsemaní restent très accessibles, à 10 min à pied des remparts.",
        picks:[
-         {nom:"Chambre boutique avec jardin — Manga 101", zone:"Manga", eur:26, total:51, note:"5,0", avis:22, airbnb:"1619658827243682848",
-          extra:"5,0 de moyenne pour 51 € les deux nuits. Chambre privée dans une maison à jardin, quartier calme."},
-         {nom:"Studio Caribe by Rosana", zone:"Manga", eur:39, total:78, note:"4,91", avis:270, airbnb:"26109793",
-          extra:"<b>270 avis à 4,91</b> — le plus éprouvé de la tranche basse. Studio privé indépendant."},
-         {nom:"Logement proche du centre historique", zone:"Carthagène", eur:40, total:79, note:"4,92", avis:48, airbnb:"1571236592218912579",
-          extra:"Logement entier à 4,92, à distance de marche des remparts."},
+         {nom:"Trésor caché près de Getsemaní — Rouge", zone:"Proche Getsemaní", eur:31, total:61, note:"4,85", avis:87, airbnb:"1293666397060364354",
+          extra:"87 avis à 4,85, pour 61 € les deux nuits."},
+         {nom:"Chambre + petit déjeuner inclus", zone:"Carthagène", eur:33, total:65, note:"4,77", avis:69, airbnb:"1333803553533937171",
+          extra:"Petit-déjeuner compris, utile le matin de l'embarquement pour Rosario."},
+         {nom:"Appartement proche du centre historique", zone:"Carthagène", eur:39, total:77, note:"4,92", avis:50, airbnb:"1571236592218912579",
+          extra:"4,92, logement entier à distance de marche des remparts. Toujours disponible malgré le décalage."},
        ]},
-     confort:{guide:"C'est la gamme où l'on peut dormir <b>intra-muros</b> ou avoir une piscine. Attention au compromis : les meilleures piscines sont à Crespo, côté aéroport, à 15 min en taxi du centre historique.",
+     confort:{guide:"C'est la gamme où l'on dort <b>intra-muros</b> ou avec vue mer.",
        picks:[
-         {nom:"Chambres Serrezuela 5", zone:"San Diego (intra-muros)", eur:57, total:114, note:"4,76", avis:156, airbnb:"1107158643717715176",
-          extra:"156 avis. <b>Dans les murs</b>, à côté du centre commercial Serrezuela — l'emplacement le plus central de la sélection."},
-         {nom:"Appartement / complexe hôtelier vue mer", zone:"Crespo", eur:71, total:141, note:"4,95", avis:78, airbnb:"1490601248972149124",
-          extra:"4,95 sur 78 avis, piscine et vue mer. ⚠ Crespo, donc côté aéroport : 15 min de taxi pour la ville murée."},
-         {nom:"Appartement méditerranéen CB510", zone:"Crespo", eur:73, total:145, note:"5,0", avis:41, airbnb:"1471124605959924858",
-          extra:"5,0 sur 41 avis. Même remarque : très confortable, mais loin du centre historique."},
+         {nom:"(2). Lofts Marmulata", zone:"Carthagène", eur:47, total:94, note:"4,61", avis:341, airbnb:"760141485415968505",
+          extra:"<b>341 avis</b> — le plus gros volume de Cartagena. Note plus modeste (4,61) mais très éprouvé."},
+         {nom:"Studio -B- dans la vieille ville", zone:"Centro (intra-muros)", eur:64, total:127, note:"4,89", avis:70, airbnb:"1049483756296387071",
+          extra:"4,89, <b>dans les murs</b> — l'emplacement le plus central de la sélection."},
+         {nom:"Exclusivo apartamento para descanso", zone:"La Boquilla", eur:69, total:137, note:"4,87", avis:112, airbnb:"807287853103474314",
+          extra:"112 avis. ⚠ La Boquilla est au nord, côté plage : compte 20 min de taxi pour la ville murée."},
        ]},
-     original:{guide:"Cartagena est l'étape où « original » est le plus facile à trouver : maisons coloniales à patio dans les murs, et balcons de Getsemaní.",
+     original:{guide:"⚠ Ma pépite précédente — <b>CAREX à Casa Helda</b>, maison coloniale intra-muros à 4,96 sur 387 avis — <b>n'est plus disponible</b> au 23-25 août. Voici ce qui la remplace le mieux.",
        picks:[
-         {nom:"CAREX à Casa Helda — Casa Colonial", zone:"Centro (intra-muros)", eur:42, total:84, note:"4,96", avis:387, airbnb:"553400142799120148",
-          extra:"<b>4,96 sur 387 avis</b> — de très loin le plus éprouvé de tout le voyage. Une vraie maison coloniale dans les murs, pour 84 € les deux nuits. Le meilleur rapport charme/prix/fiabilité que j'ai trouvé."},
-         {nom:"Chambre Getsemaní — balcon & climatisation", zone:"Getsemaní", eur:53, total:106, note:"4,83", avis:60, airbnb:"1597163331584183853",
-          extra:"Salle de bain privée, clim et mini-balcon en plein Getsemaní — le quartier où sortir le soir."},
-         {nom:"Bord de mer • Piscine • Concierge 24h/24", zone:"Crespo", eur:80, total:159, note:"4,92", avis:65, airbnb:"1226202150524690282",
-          extra:"Le haut du plafond : bord de mer, piscine, conciergerie. ⚠ Côté aéroport, pas centre historique."},
+         {nom:"Suite Premium avec terrasse et jacuzzi privé", zone:"Carthagène", eur:73, total:145, note:"4,98", avis:48, airbnb:"1532026550550357679",
+          extra:"<b>4,98 sur 48 avis.</b> Terrasse et jacuzzi privés — la plus belle option restante."},
+         {nom:"Chambre boutique avec jardin — Manga 101", zone:"Manga", eur:51, total:101, note:"5,0", avis:22, airbnb:"1619658827243682848",
+          extra:"5,0 de moyenne, chambre dans une maison à jardin. ⚠ Le prix a doublé par rapport aux anciennes dates (26 → 51 €)."},
+         {nom:"Duplex avec vue sur la plage B4-18", zone:"Carthagène", eur:49, total:97, note:"4,65", avis:75, airbnb:"793735451085894983",
+          extra:"Duplex avec vue plage. Note correcte sans plus (4,65)."},
        ]},
    },
-   note:"Vous arrivez le 26 au matin après le bus de nuit depuis Medellín : privilégie un hébergement acceptant l'arrivée tôt ou gardant les bagages. Le 28 vous embarquez pour les Islas del Rosario — les départs de lanchas se font au <b>Muelle de la Bodeguita</b>, à côté de la ville murée, donc dormir au centre ou à Getsemaní simplifie ce matin-là."},
+   note:"Vous arrivez le 23 au matin après le bus de nuit depuis Medellín : privilégie un hébergement acceptant l'arrivée tôt. Le 25 vous embarquez pour Rosario au <b>Muelle de la Bodeguita</b>, à côté de la ville murée."},
 
-  {stop:5, key:"rosario", name:"Islas del Rosario", nights:2,
-   checkin:`${YEAR}-08-28`, checkout:`${YEAR}-08-30`,
+  {stop:4, key:"rosario", name:"Islas del Rosario", nights:2,
+   checkin:`${YEAR}-08-25`, checkout:`${YEAR}-08-27`,
    search:"Islas del Rosario, Bolívar, Colombie",
-   areas:"Presque tout se concentre sur <b>Isla Grande</b>, la seule île avec plusieurs hébergements, des chemins à pied et la Laguna Encantada (plancton bioluminescent la nuit). Pas de voitures, pas de distributeur : prévois du cash. La lancha part du Muelle de la Bodeguita à Cartagena, ~1h.",
+   areas:"Presque tout se concentre sur <b>Isla Grande</b> : pas de voitures, chemins à pied, et la Laguna Encantada avec son plancton bioluminescent. Pas de distributeur : prévois du cash. Lancha depuis le Muelle de la Bodeguita, ~1h.",
    cats:{
-     abordable:{guide:"⚠ Constat de la recherche : <b>Rosario est hors budget</b>. Sur 18 annonces Airbnb aux tes dates, 12 dépassent 82 €/nuit et la fourchette monte jusqu'à 494 €. Côté Booking, 23 résultats sur 25 crèvent le plafond. Une seule option correcte tient sous 45 €.",
+     abordable:{guide:"⚠ Rosario reste l'étape la plus contrainte : <b>11 annonces sur 18 dépassent encore le plafond</b> aux nouvelles dates. Bonne nouvelle malgré tout, les prix ont légèrement baissé par rapport au 28-30 août.",
        picks:[
-         {nom:"Chambre Laguna — Art et Aventure Ecohotel", zone:"Isla Grande", eur:39, total:78, note:"4,58", avis:31, airbnb:"20066242",
-          extra:"Le seul hébergement sous 45 € trouvé sur l'île. Note plus modeste (4,58) mais c'est le prix d'entrée pour dormir sur Rosario."},
+         {nom:"Chambre Laguna — Art et Aventure Ecohotel", zone:"Isla Grande", eur:40, total:79, note:"4,58", avis:31, airbnb:"20066242",
+          extra:"Le seul hébergement sous 45 € sur l'île. Note modeste (4,58), mais c'est le prix d'entrée pour dormir sur Rosario."},
        ]},
-     confort:{guide:"C'est la vraie fourchette de Rosario. Les « Barracuda » sont deux chalets insulaires du même hôte sur Isla Grande — les valeurs les plus sûres de l'archipel dans ce budget.",
+     confort:{guide:"La vraie fourchette de Rosario. Les deux « Barracuda » sont des chalets insulaires du même hôte sur Isla Grande.",
        picks:[
-         {nom:"Chambre spectaculaire, salle de bain privée, vue mer", zone:"Isla Grande", eur:58, total:116, note:"5,0", avis:8, airbnb:"1693552659732521207",
-          extra:"5,0 de moyenne, mais seulement 8 avis. Vue mer directe."},
-         {nom:"Barracuda 1 — chalet insulaire", zone:"Isla Grande", eur:66, total:132, note:"4,59", avis:39, airbnb:"52278179",
-          extra:"Chalet en bois sur l'île. 39 avis, note correcte sans être excellente."},
-         {nom:"Barracuda 2 — chalet insulaire", zone:"Isla Grande", eur:72, total:144, note:"4,83", avis:41, airbnb:"46721888",
-          extra:"Le mieux noté des deux Barracuda (4,83 / 41 avis) — mon choix par défaut si tu veux dormir sur Rosario."},
+         {nom:"Chambre spectaculaire, salle de bain privée, vue mer", zone:"Isla Grande", eur:49, total:98, note:"5,0", avis:8, airbnb:"1693552659732521207",
+          extra:"5,0 de moyenne et <b>9 € moins cher qu'aux anciennes dates</b>. Seulement 8 avis."},
+         {nom:"Barracuda 1 — chalet insulaire", zone:"Isla Grande", eur:67, total:133, note:"4,59", avis:39, airbnb:"52278179",
+          extra:"Chalet en bois sur l'île. 39 avis."},
+         {nom:"Barracuda 2 — chalet insulaire", zone:"Isla Grande", eur:73, total:146, note:"4,83", avis:41, airbnb:"46721888",
+          extra:"Le mieux noté des deux Barracuda (4,83) — mon choix par défaut pour dormir sur Rosario."},
        ]},
-     original:{guide:"Sur Rosario, l'insolite <b>est</b> le standard : tout est bungalow, chalet ou écolodge sans voiture. La catégorie se confond donc avec la précédente — je ne la remplis pas artificiellement.",
+     original:{guide:"Sur Rosario, l'insolite <b>est</b> le standard : tout est bungalow ou écolodge sans voiture. La catégorie se confond avec la précédente — je ne la remplis pas artificiellement.",
        picks:[
-         {nom:"Bungalow romantique, pour 2", zone:"Islas del Rosario", eur:77, total:154, note:null, avis:0, airbnb:"1232586420645280461",
-          extra:"Bungalow pensé pour deux, le plus haut de gamme sous plafond. ⚠ Aucun avis à ce jour : annonce neuve, à réserver sur la foi des photos seulement."},
+         {nom:"Chambre privée · WiFi · Nature", zone:"Islas del Rosario", eur:65, total:130, note:"4,56", avis:9, airbnb:"1376300785034370926",
+          extra:"En pleine nature sur l'archipel. 9 avis seulement, note 4,56."},
        ]},
    },
-   note:"⚠ <b>C'est l'étape la plus contrainte du séjour.</b> Si le plafond de 80 € est ferme, tu n'as réellement que 5 options sur toute l'archipel, dont une seule sous 45 €. Deux issues : accepter ~70-80 €/nuit ici (et compenser ailleurs, Guatapé et Salento sont très bon marché), ou remplacer Rosario par <b>Barú</b>, relié par la route, où l'offre est bien plus large et moins chère."},
+   note:"⚠ Le « Bungalow romantique pour 2 » de la recherche précédente n'est plus disponible. Deux issues si le plafond de 80 € est ferme : accepter ~70 € ici et compenser sur Guatapé/Salento, ou remplacer Rosario par <b>Barú</b>, relié par la route et bien plus fourni."},
 
-  {stop:5, key:"san-bernardo", name:"Îles de San Bernardo", nights:2,
-   checkin:`${YEAR}-08-30`, checkout:`${YEAR}-09-01`,
-   search:"Rincon del Mar--Sucre--Colombie", searchOriginal:"Isla Tintipan--Colombie",
-   areas:"Distinction essentielle : <b>dormir sur les îles</b> (Múcura, Tintipán) coûte cher et l'offre est minuscule, ou <b>dormir à Rincón del Mar</b>, le village de pêcheurs sur le continent d'où partent les lanchas — bien moins cher, très charmant, avec sorties bateau à la journée. Attention aux résultats trompeurs : « San Bernardo del Viento », Coveñas et El Porvenir sont sur le continent, à des dizaines de km au sud.",
+  {stop:4, key:"san-bernardo", name:"Îles de San Bernardo", nights:2,
+   checkin:`${YEAR}-08-27`, checkout:`${YEAR}-08-29`,
+   search:"Rincon del Mar, Sucre, Colombie", searchOriginal:"Rincon del Mar, Sucre, Colombie",
+   areas:"Distinction essentielle : <b>dormir sur les îles</b> (Múcura, Tintipán) coûte cher et l'offre est minuscule, ou <b>dormir à Rincón del Mar</b>, le village de pêcheurs d'où partent les lanchas — bien moins cher, très charmant, avec sorties bateau à la journée.",
    cats:{
-     abordable:{guide:"À ce prix, c'est Rincón del Mar : village de pêcheurs sans bitume, hamacs et lanchas. Les îles, elles, ne descendent pas sous 79 €.",
+     abordable:{guide:"À ce prix c'est Rincón del Mar : village de pêcheurs sans bitume, hamacs et lanchas.",
        picks:[
-         {nom:"Refuge entouré de mangrove, plage et mer", zone:"San Bernardo del Viento", eur:45, total:90, note:"4,71", avis:17, airbnb:"1577800164744651000",
-          extra:"⚠ Attention à la géographie : San Bernardo del Viento est dans le Córdoba, très au sud de l'archipel — à ne prendre que si tu acceptes de renoncer aux îles."},
-         {nom:"Auberge Casa en la Ciénaga", zone:"Rincón del Mar", eur:46, total:91, note:"4,79", avis:28, airbnb:"1326932701471231771",
-          extra:"Dans le bon village de départ pour les îles. Maison d'hôtes, 4,79 sur 28 avis."},
+         {nom:"C12 — chambre avec salle de bain pour 2", zone:"Rincón del Mar", eur:33, total:66, note:"5,0", avis:3, airbnb:"565961725692394119",
+          extra:"Le moins cher du village. ⚠ Seulement 3 avis."},
+         {nom:"Auberge Casa en la Ciénaga", zone:"Rincón del Mar", eur:46, total:92, note:"4,79", avis:28, airbnb:"1326932701471231771",
+          extra:"Maison d'hôtes dans le bon village de départ pour les îles. 28 avis."},
        ]},
-     confort:{guide:"La bonne zone de prix pour Rincón del Mar : cabanes et écolodges les pieds dans l'eau, avec les sorties bateau vers Múcura et Tintipán organisées sur place.",
+     confort:{guide:"La bonne zone de prix : cabanes et écolodges les pieds dans l'eau, avec les sorties bateau vers Múcura et Tintipán organisées sur place.",
        picks:[
-         {nom:"La Bita Ecolodge & Dive 2", zone:"Rincón del Mar", eur:55, total:109, note:"5,0", avis:16, airbnb:"1409499931639677600",
-          extra:"5,0 de moyenne. Écolodge avec centre de plongée — pratique pour les sorties snorkeling."},
-         {nom:"Cabane pour 2 personnes", zone:"Rincón del Mar", eur:60, total:120, note:"4,89", avis:115, airbnb:"28388141",
-          extra:"<b>115 avis à 4,89</b> — de loin le plus éprouvé du secteur. Cabane privée pour deux."},
-         {nom:"Plage à 80 m, piscine, wifi", zone:"Coveñas", eur:65, total:130, note:"4,93", avis:80, airbnb:"1329281432772103064",
-          extra:"4,93 sur 80 avis, avec piscine. ⚠ Coveñas est sur le continent au sud, pas sur l'archipel."},
+         {nom:"La Bita — Écolodge et plongée 1", zone:"Rincón del Mar", eur:54, total:107, note:"5,0", avis:24, airbnb:"1409496597869155352",
+          extra:"5,0 sur 24 avis. Écolodge avec centre de plongée."},
+         {nom:"La Bita — Écolodge et plongée 2", zone:"Rincón del Mar", eur:56, total:111, note:"5,0", avis:16, airbnb:"1409499931639677600",
+          extra:"La seconde cabane du même écolodge, 5,0 également."},
+         {nom:"Hébergement el pescador", zone:"San Onofre", eur:69, total:138, note:"4,74", avis:57, airbnb:"908778826097481575",
+          extra:"57 avis. ⚠ San Onofre est sur le continent, un peu au sud de Rincón del Mar."},
        ]},
-     original:{guide:"Une seule vraie option insulaire tient sous le plafond. C'est l'expérience que tu es venu chercher — eau turquoise, pas de route, pas de voiture — mais l'offre est extrêmement mince.",
+     original:{guide:"⚠ <b>Aucun hébergement sur les îles elles-mêmes n'est disponible sous 80 € à ces dates</b> — la chambre face à la mer sur Isla Tintipán, seule option insulaire de la recherche précédente, a disparu. Ce qui reste, c'est le front de mer de Rincón del Mar.",
        picks:[
-         {nom:"Habitación privée, face à la mer", zone:"Isla Tintipán", eur:79, total:158, note:"4,75", avis:12, airbnb:"1005302471624564698",
-          extra:"<b>Le seul hébergement réellement sur les îles</b> sous 80 €. Chambre privée face à la mer sur Tintipán. 12 avis seulement — mais c'est ça ou le continent."},
+         {nom:"Aquarius Diving & Cabañas, front de mer", zone:"Rincón del Mar", eur:73, total:145, note:null, avis:0, airbnb:"1711983792774160189",
+          extra:"Cabañas en front de mer avec centre de plongée. ⚠ Aucun avis : annonce neuve."},
+         {nom:"Rincón del mangle — appart-suite Tatita", zone:"San Onofre", eur:64, total:127, note:"5,0", avis:3, airbnb:"1426832916379448931",
+          extra:"Dans la mangrove. ⚠ 3 avis seulement."},
        ]},
    },
-   note:"Rappel logistique : le 1ᵉʳ septembre vous remontez vers Santa Marta. Depuis <b>Rincón del Mar</b> c'est plus simple (pas de bateau à prendre le matin) que depuis une île. Si tu dors sur Tintipán, réserve la lancha directe vers Cartagena la veille."},
+   note:"⚠ Changement notable depuis la dernière recherche : <b>plus aucune option sur les îles</b> sous plafond. Si dormir sur Múcura ou Tintipán compte vraiment, il faudra soit dépasser 80 €, soit passer par une agence à Cartagena (formules bateau + nuit + repas, souvent hors plateforme)."},
 
-  {stop:6, key:"santa-marta", name:"Santa Marta & la Sierra", nights:3,
-   checkin:`${YEAR}-09-01`, checkout:`${YEAR}-09-04`,
+  {stop:5, key:"santa-marta", name:"Santa Marta & la Sierra", nights:3,
+   checkin:`${YEAR}-08-29`, checkout:`${YEAR}-09-01`,
    search:"Santa Marta, Magdalena, Colombie", searchOriginal:"Taganga, Santa Marta, Colombie",
-   areas:"<b>Centro histórico</b> : le plus pratique pour les bus vers Minca et Tayrona, et pour dîner à pied. <b>El Rodadero / Gaira</b> : plage et immeubles, plus familial, 15 min du centre. <b>Taganga</b> : village de pêcheurs dans une baie à 10 min, le plus joli au coucher de soleil mais plus isolé le soir.",
+   areas:"<b>Centro histórico</b> : le plus pratique pour les bus vers Minca et Tayrona. <b>El Rodadero / Gaira</b> : plage et immeubles, plus familial. <b>Taganga</b> : village de pêcheurs dans une baie à 10 min, le plus joli au coucher de soleil.",
    cats:{
-     abordable:{guide:"Santa Marta est très abordable sur 3 nuits, avec plusieurs annonces à très gros volume d'avis — de quoi réserver sans mauvaise surprise.",
+     abordable:{guide:"Excellente surprise du décalage : Santa Marta est <b>nettement moins chère</b> fin août que début septembre, avec des annonces à très gros volume d'avis.",
        picks:[
-         {nom:"Rodadero Santa Marta — chambre supérieure", zone:"Gaira / El Rodadero", eur:24, total:71, note:"4,73", avis:548, airbnb:"572618454452255569",
-          extra:"<b>548 avis</b> et 71 € les trois nuits : le meilleur rapport prix/fiabilité de tout le voyage."},
-         {nom:"Appartement artistique à deux pas de la baie", zone:"Santa Marta", eur:36, total:107, note:"4,75", avis:198, airbnb:"27727769",
-          extra:"198 avis. Logement entier, proche du front de mer."},
-         {nom:"Esprit tropical dans le centre", zone:"Centro histórico", eur:37, total:110, note:"4,89", avis:254, airbnb:"861444162943788358",
-          extra:"<b>254 avis à 4,89</b> et en plein centre — le meilleur équilibre des trois pour rayonner vers Minca et Tayrona."},
+         {nom:"Chambre double — hôtel", zone:"Santa Marta", eur:19, total:57, note:"4,87", avis:220, airbnb:"1167713111684238607",
+          extra:"<b>57 € les trois nuits</b>, 220 avis à 4,87. Le meilleur rapport prix/fiabilité de tout le voyage."},
+         {nom:"Aluna — vue sur la mer, balcon et cuisine privée", zone:"Taganga", eur:25, total:74, note:"4,86", avis:607, airbnb:"13957610",
+          extra:"<b>607 avis</b> — le plus massivement testé de toute la sélection. Cabane à Taganga avec vue mer."},
+         {nom:"Vue fantastique sur la mer + petit déjeuner", zone:"Taganga", eur:32, total:96, note:"4,95", avis:218, airbnb:"959484111096582390",
+          extra:"4,95 sur 218 avis, petit-déjeuner inclus — et <b>17 € moins cher qu'aux anciennes dates</b>."},
        ]},
-     confort:{guide:"Ici le budget achète la vue et la piscine. Utile : c'est l'étape la plus chaude du voyage (33°), une piscine en fin de journée change tout.",
+     confort:{guide:"⚠ Sur ces dates, Santa Marta est si abordable que la tranche 55-80 € est presque vide : quasi tout le bon se trouve en dessous. J'ai donc élargi vers le haut de la tranche basse plutôt que de forcer.",
        picks:[
-         {nom:"G.927 Suite de luxe — Playa Salguero", zone:"Gaira / Playa Salguero", eur:55, total:165, note:"5,0", avis:37, airbnb:"1604536010733765074",
-          extra:"5,0 sur 37 avis, à quelques pas de la plage."},
-         {nom:"Ocean View — piscine sur le toit et jacuzzi", zone:"Santa Marta", eur:56, total:169, note:"4,97", avis:33, airbnb:"1521060129208305582",
-          extra:"<b>4,97</b>, piscine sur le toit et jacuzzi. Le meilleur choix « récupération » après Tayrona."},
-         {nom:"Studio EIRA 179 — vue sur la mer", zone:"Santa Marta", eur:79, total:236, note:"4,96", avis:23, airbnb:"1604556120839355109",
-          extra:"4,96, vue mer plein cadre. Le haut du plafond."},
+         {nom:"Casa Olivia — villa avec piscine privée", zone:"Taganga", eur:71, total:214, note:"4,94", avis:81, airbnb:"7820723",
+          extra:"<b>Villa entière avec piscine privée</b>, 4,94 sur 81 avis. La seule vraie option haut de gamme du lot."},
+         {nom:"Appartement spectaculaire, vue mer + petit déj.", zone:"Santa Marta", eur:46, total:138, note:"4,93", avis:360, airbnb:"52307361",
+          extra:"<b>360 avis à 4,93.</b> Vue mer et petit-déjeuner — meilleur que bien des options plus chères."},
+         {nom:"Hôtel Casa Encantada — chambre privée", zone:"Santa Marta", eur:47, total:142, note:"4,95", avis:38, airbnb:"1356659856720899499",
+          extra:"« La maison enchantée », 4,95. Petit hôtel de caractère."},
        ]},
-     original:{guide:"L'originalité ici, c'est Taganga : une baie de pêcheurs encaissée, à 10 min du centre, où le coucher de soleil est le meilleur de la côte.",
+     original:{guide:"Taganga et les cabanes de la côte : c'est ici que Santa Marta sort de l'ordinaire, et les volumes d'avis sont impressionnants.",
        picks:[
-         {nom:"Vue fantastique sur la mer + petit déjeuner", zone:"Taganga", eur:49, total:146, note:"4,95", avis:218, airbnb:"959484111096582390",
-          extra:"<b>4,95 sur 218 avis</b>, vue mer et <b>petit-déjeuner inclus</b>, à Taganga. Ma recommandation n° 1 pour cette étape."},
-         {nom:"Aguamarina — Loft Buritaca", zone:"Taganga", eur:71, total:212, note:"4,89", avis:98, airbnb:"919652415181185690",
-          extra:"98 avis à 4,89. Loft dans la baie de Taganga."},
-         {nom:"Hôtel Casa Encantada — chambre privée", zone:"Santa Marta", eur:47, total:141, note:"4,95", avis:38, airbnb:"1356659856720899499",
-          extra:"« La maison enchantée » — 4,95 sur 38 avis. Chambre privée dans un petit hôtel de caractère."},
+         {nom:"Cabañas Annapurna — lever du soleil, jacuzzi privé", zone:"Santa Marta", eur:43, total:130, note:"4,84", avis:517, airbnb:"45709410",
+          extra:"<b>517 avis.</b> Cabane avec jacuzzi privé et lever de soleil sur la mer — ma recommandation n° 1 pour cette étape."},
+         {nom:"Manoush Beach — tente vue sur mer", zone:"Santa Marta", eur:29, total:88, note:"4,87", avis:63, airbnb:"1120413179426564157",
+          extra:"Une <b>tente</b> aménagée face à la mer, 4,87 sur 63 avis. Le plus insolite de la côte."},
+         {nom:"Cabane avec vue sur la mer, petit déj. et clim", zone:"Santa Marta", eur:28, total:83, note:"4,92", avis:264, airbnb:"897891625228484314",
+          extra:"264 avis à 4,92, pour 83 € les trois nuits. Cabane climatisée avec petit-déjeuner."},
        ]},
    },
-   note:"Base groupée unique comme convenu : d'ici vous rayonnez à la journée vers Minca (montagne, ~45 min) et Tayrona (~1h, arriver tôt). Si vous priorisez Tayrona, dormir au <b>centre</b> ou à <b>Taganga</b> facilite les départs matinaux ; El Rodadero est plus loin des terminaux de bus."},
+   note:"Base groupée unique : d'ici vous rayonnez à la journée vers Minca (~45 min) et Tayrona (~1h, arriver tôt). ⚠ Le 1er septembre le vol pour Leticia décolle à <b>12h</b> : ne prévois aucune excursion ce matin-là."},
+
+  {stop:6, key:"leticia-ville", name:"Leticia — ville", nights:1,
+   checkin:`${YEAR}-09-01`, checkout:`${YEAR}-09-02`,
+   search:"Leticia, Amazonas, Colombie",
+   areas:"Vous atterrissez à <b>17h</b> après une journée de vol : cette nuit-là sert à souffler, dîner au Parque Santander et caler l'excursion du lendemain avec une agence. Tout le centre est à distance de marche, et l'aéroport est à 5 min de la ville.",
+   cats:{
+     abordable:{guide:"Le centre de Leticia est petit et tout se fait à pied. La climatisation est non négociable : 31° et très humide.",
+       picks:[
+         {nom:"Casa de Nora & Alejo — chambre indépendante", zone:"Leticia centre", eur:25, note:"4,79", avis:184, airbnb:"16498173",
+          extra:"<b>184 avis</b> — le plus éprouvé de Leticia. Chambre indépendante chez l'habitant."},
+         {nom:"La maison 4 — proche aéroport, cuisine incluse", zone:"Proche aéroport", eur:28, note:"4,88", avis:117, airbnb:"995621969927570547",
+          extra:"117 avis à 4,88, et <b>près de l'aéroport</b> — idéal pour une arrivée à 17h."},
+         {nom:"Hôtel Santa Helena « Un paradis en Amazonie »", zone:"Leticia", eur:43, note:"4,86", avis:90, airbnb:"52496694",
+          extra:"90 avis. Hôtel avec un vrai confort pour une nuit de transition."},
+       ]},
+     confort:{guide:"À ce prix la climatisation est systématique, et on gagne de l'espace pour poser les sacs avant de partir en jungle.",
+       picks:[
+         {nom:"Apartamento Premium", zone:"Leticia", eur:54, note:"4,95", avis:20, airbnb:"1237667086548997438",
+          extra:"4,95. Appartement entier, 2 chambres."},
+         {nom:"Miroir du ciel Amazonia Deluxe", zone:"Leticia", eur:60, note:"4,85", avis:52, airbnb:"1040852372046018832",
+          extra:"52 avis à 4,85."},
+         {nom:"Chambre double avec climatisation", zone:"Leticia", eur:65, note:"4,95", avis:43, airbnb:"1130351352675618743",
+          extra:"<b>4,95 sur 43 avis</b> — la meilleure note de la tranche."},
+       ]},
+     original:{guide:"Pour une seule nuit en ville, l'insolite se joue sur le caractère du lieu plutôt que sur l'isolement — la jungle, c'est pour les deux nuits suivantes.",
+       picks:[
+         {nom:"Inspiré par la culture amazonienne !", zone:"Leticia", eur:66, note:"5,0", avis:5, airbnb:"41740583",
+          extra:"<b>Boutique-hôtel</b> décoré autour de la culture amazonienne, 5,0 de moyenne. ⚠ 5 avis seulement."},
+         {nom:"Hôtel Chafo", zone:"Leticia", eur:38, note:"4,95", avis:37, airbnb:"53546020",
+          extra:"4,95 sur 37 avis — excellent rapport qualité/prix pour un petit hôtel de caractère."},
+         {nom:"Maloka — Casa do Xingu", zone:"Tabatinga, <b>Brésil</b>", eur:17, note:"5,0", avis:4, airbnb:"1388012603391221908",
+          extra:"Une vraie maloka pour 17 €. ⚠ Côté brésilien : Tabatinga est collée à Leticia, mais vérifie les formalités de frontière. 4 avis."},
+       ]},
+   },
+   note:"Une seule nuit, arrivée à 17h : privilégie un hébergement proche du centre ou de l'aéroport, et réserve l'excursion jungle du lendemain <b>avant</b> d'arriver si possible — les agences ferment tôt."},
+
+  {stop:6, key:"jungle", name:"Lodge en jungle — Puerto Nariño", nights:2,
+   checkin:`${YEAR}-09-02`, checkout:`${YEAR}-09-04`,
+   search:"Puerto Nariño, Amazonas, Colombie",
+   areas:"Puerto Nariño est à ~2h de bateau de Leticia : village sans voitures, sur le Rio Loretoyacu. Autour, les communautés de <b>San Martín de Amacayacu</b>, <b>Mocagua</b> et <b>Macedonia</b> proposent des hébergements gérés par les communautés indigènes, dans le parc Amacayacu. C'est le bout du voyage.",
+   cats:{
+     abordable:{guide:"L'Amazonie profonde est étonnamment bon marché : ce sont des hébergements communautaires, simples mais très bien notés.",
+       picks:[
+         {nom:"Reina Arriera — hébergement et visites", zone:"Loreto Mocagua", eur:15, total:29, note:"4,98", avis:44, airbnb:"699208726137981742",
+          extra:"<b>29 € les deux nuits, 4,98 sur 44 avis.</b> Hébergement communautaire avec excursions incluses — le meilleur rapport qualité/prix de tout le voyage."},
+         {nom:"Auberge et artisanat La Hormiga", zone:"Puerto Nariño", eur:28, total:56, note:"4,78", avis:37, airbnb:"826696484380775196",
+          extra:"37 avis. Au village même, avec atelier d'artisanat."},
+         {nom:"Kowapana Amacayacu — chambre 1", zone:"San Martín de Amacayacu", eur:40, total:79, note:"4,87", avis:39, airbnb:"47957375",
+          extra:"4,87 sur 39 avis, dans la communauté de San Martín, au bord du parc Amacayacu."},
+       ]},
+     confort:{guide:"Le haut de gamme amazonien reste modeste en prix : ce sont des écolodges en bois sur pilotis, pas des hôtels.",
+       picks:[
+         {nom:"Écolodge Satori Amazonas — cabane Icaro", zone:"Puerto Nariño", eur:56, total:111, note:"5,0", avis:16, airbnb:"1139873852185480264",
+          extra:"<b>5,0 de moyenne.</b> Cabane privée dans un écolodge — le meilleur compromis confort/immersion."},
+         {nom:"Écolodge Satori Amazonas — cabane Porâ", zone:"Puerto Nariño", eur:56, total:111, note:"4,89", avis:9, airbnb:"1139875149902265451",
+          extra:"La seconde cabane du même écolodge, si Icaro est prise."},
+         {nom:"Nature amazonienne 2", zone:"Puerto Nariño", eur:79, total:158, note:"5,0", avis:7, airbnb:"827853455455244128",
+          extra:"5,0 de moyenne, le haut du plafond. ⚠ 7 avis seulement."},
+       ]},
+     original:{guide:"C'est <b>la</b> catégorie de cette étape : maloka traditionnelle, hébergement en communauté indigène, lodge rural au bord du fleuve. Rien de tout ça n'existe ailleurs sur le voyage.",
+       picks:[
+         {nom:"Maloka Napü", zone:"Puerto Nariño", eur:49, total:98, note:"4,87", avis:30, airbnb:"22357457",
+          extra:"<b>Une vraie maloka</b> — habitat traditionnel amazonien — avec 30 avis à 4,87. La pépite de l'étape."},
+         {nom:"Amacayacu Lodge", zone:"San Martín de Amacayacu", eur:30, total:60, note:"4,97", avis:36, airbnb:"17095682",
+          extra:"<b>4,97 sur 36 avis.</b> Lodge tenu par la communauté ticuna de San Martín, à l'entrée du parc national Amacayacu."},
+         {nom:"Hébergement rural Gavilán Tatatao", zone:"Caserío El Vergel", eur:36, total:72, note:"5,0", avis:39, airbnb:"739859470597070780",
+          extra:"<b>5,0 sur 39 avis.</b> Hébergement rural isolé — le plus immersif du lot."},
+       ]},
+   },
+   note:"⚠ <b>Le 4 au matin, il faut ressortir.</b> Compte ~2h de bateau Puerto Nariño → Leticia, et les départs sont peu nombreux (souvent 7h et 11h). Cale ça avec le lodge dès la réservation, et prends le vol Leticia→Bogotá le plus tardif possible ce jour-là."},
 
   {stop:7, key:"bogota-out", name:"Bogotá — départ", nights:1,
    checkin:`${YEAR}-09-04`, checkout:`${YEAR}-09-05`,
    search:"Bogotá, Colombie", searchOriginal:"La Candelaria, Bogotá, Colombie",
-   areas:"Situation inverse de l'aller : vous arrivez en <b>avion</b> le 4 en journée et le vol international est le 5 à 21h35. Vous avez donc toute la journée du 5 libre — c'est le moment de faire La Candelaria, Monserrate ou Zipaquirá. Dormir au centre devient un vrai avantage, contrairement à la nuit d'arrivée.",
+   areas:"Vous arrivez de Leticia le 4 en journée, et le vol international est le 5 à 21h35 : toute la journée du 5 est libre. Dormir au centre a donc du sens pour finir sur La Candelaria, Monserrate ou Zipaquirá.",
    cats:{
-     abordable:{guide:"Bogotá reste la ville la moins chère du séjour, et cette fois le centre a du sens : vous avez la journée du 5 pour en profiter avant le vol du soir.",
+     abordable:{guide:"Bogotá reste la ville la moins chère du séjour, et le centre a du sens pour cette dernière journée.",
        picks:[
          {nom:"Appartement 101 à 5 min de l'aéroport", zone:"Fontibón", eur:29, note:"4,80", avis:245, airbnb:"1365980663701917223",
-          extra:"Le même qu'à l'aller, toujours à 29 €. À choisir si tu préfères zéro stress logistique au vol du soir."},
+          extra:"À choisir si tu préfères zéro stress logistique pour le vol du soir."},
          {nom:"B-Cozy Loft près de Monserrate", zone:"Santa Fe", eur:31, note:"4,73", avis:553, airbnb:"606511386530800154",
           extra:"<b>553 avis.</b> À deux pas du funiculaire de Monserrate — idéal pour la matinée du 5."},
          {nom:"Loft calme avec balcon et vue sur les montagnes", zone:"La Castellana", eur:34, note:"4,82", avis:51, airbnb:"1629232445892165387",
           extra:"Quartier résidentiel calme, balcon avec vue sur les cerros."},
        ]},
-     confort:{guide:"⚠ À savoir : le plafond réel d'Airbnb à Bogotá est autour de <b>67 €</b>. Au-delà, il faut passer par l'hôtellerie (les NH Collection et Santafe Boutique vus à l'étape 1). Ici, monter en budget achète surtout du volume d'avis et des équipements, pas du prix.",
+     confort:{guide:"⚠ Le plafond réel d'Airbnb à Bogotá est autour de <b>67 €</b>. Monter en budget achète surtout du volume d'avis et des équipements, pas du prix.",
        picks:[
          {nom:"72Hub by Jalo — piscine et salle de sport", zone:"Barrios Unidos", eur:45, note:"4,69", avis:6248, airbnb:"33186477",
-          extra:"<b>6 248 avis</b> — l'annonce la plus massivement testée de tout le voyage. Piscine et salle de sport comprises."},
+          extra:"<b>6 248 avis</b> — l'annonce la plus massivement testée de tout le voyage."},
          {nom:"Studio Loft confortable à La Candelaria", zone:"La Candelaria", eur:46, note:"4,88", avis:477, airbnb:"23902018",
           extra:"477 avis à 4,88, en plein centre colonial."},
          {nom:"Balcons. La Candelaria", zone:"La Candelaria", eur:67, note:"4,89", avis:546, airbnb:"48218124",
-          extra:"546 avis. Le haut du marché Airbnb à Bogotá, dans une maison coloniale à balcons."},
+          extra:"546 avis. Le haut du marché Airbnb à Bogotá, maison coloniale à balcons."},
        ]},
-     original:{guide:"Pour la dernière nuit, La Candelaria a plusieurs maisons coloniales avec des volumes d'avis rassurants — et vous êtes à pied de tout ce qu'il vous reste à voir.",
+     original:{guide:"Pour la dernière nuit, La Candelaria a plusieurs maisons coloniales avec des volumes d'avis rassurants.",
        picks:[
          {nom:"Emplacement parfait dans La Candelaria !", zone:"La Candelaria", eur:39, note:"4,86", avis:579, airbnb:"11566250",
           extra:"<b>579 avis</b> à 4,86 pour 39 € — le meilleur rapport centre-historique/prix/fiabilité de Bogotá."},
          {nom:"Nouvel équipement 501 — belle vue, balcon", zone:"Puente Aranda", eur:37, note:"4,99", avis:94, airbnb:"1487427132717293314",
-          extra:"<b>4,99 sur 94 avis</b> — la meilleure note de Bogotá. Quartier moins touristique."},
+          extra:"<b>4,99 sur 94 avis</b> — la meilleure note de Bogotá."},
        ]},
    },
-   note:"Le vol du 5 est à 21h35 : compte 3h avant, donc départ vers l'aéroport ~18h. Tu peux garder les bagages presque partout et occuper la journée. Zipaquirá (cathédrale de sel) fait un aller-retour de ~5h depuis le nord de Bogotá — jouable, mais serré si tu veux aussi voir La Candelaria."},
+   note:"Dates inchangées par le réagencement. Le vol du 5 est à 21h35 : compte 3h avant, donc départ vers l'aéroport ~18h. Zipaquirá fait un aller-retour de ~5h — jouable, mais serré si tu veux aussi La Candelaria."},
 ];
 
 /* ---------- LATER: what-if suggestions with implications ---------- */
@@ -1033,8 +1070,6 @@ const legStyle={
   day:{color:'#15302C',weight:2.4,opacity:.5},
   boat:{color:'#1FA2D6',weight:2.6,opacity:.8,dashArray:'2,8'},
   flight:{color:'#E0673B',weight:2.4,opacity:.8,dashArray:'1,7'},
-  /* dot-then-dash reads as "flight, then bus" without needing a second colour */
-  flightnight:{color:'#E0673B',weight:2.6,opacity:.85,dashArray:'1,6,9,6'},
 };
 let routeLines=[];
 /* on satellite the dark ink legs disappear into the imagery — swap them to white */
@@ -1132,7 +1167,6 @@ STOPS.forEach((s,i)=>{
     const grad={night:'repeating-linear-gradient(90deg,var(--ink) 0 4px,transparent 4px 8px)',
       boat:'repeating-linear-gradient(90deg,var(--iles) 0 2px,transparent 2px 6px)',
       flight:'repeating-linear-gradient(90deg,var(--coral) 0 2px,transparent 2px 6px)',
-      flightnight:'repeating-linear-gradient(90deg,var(--coral) 0 2px,transparent 2px 5px,var(--coral) 5px 11px,transparent 11px 14px)',
       day:'rgba(21,48,44,.4)'};
     link.style.background=grad[mode]||grad.day;
     ribbon.appendChild(link);
